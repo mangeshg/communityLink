@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
+import CouncilLogin from "./CouncilLogin.jsx";
 
 /**
  * CommunityLink demo app
@@ -22,24 +24,38 @@ export default function App() {
 
   return (
     <div className="min-h-screen w-full bg-neutral-50">
-      {signedIn ? (
-        <Dashboard onSignOut={() => setSignedIn(false)} />
-      ) : (
-        <SignIn
-          email={email}
-          setEmail={setEmail}
-          onSubmit={onSubmit}
-          startMyGovIdFlow={startMyGovIdFlow}
+      <Routes>
+        <Route
+          path="/"
+          element={signedIn ? (
+            <Dashboard onSignOut={() => setSignedIn(false)} />
+          ) : (
+            <SignIn
+              email={email}
+              setEmail={setEmail}
+              onSubmit={onSubmit}
+              startMyGovIdFlow={startMyGovIdFlow}
+            />
+          )}
         />
-      )}
+        <Route path="/council-login" element={<CouncilLogin />} />
+      </Routes>
     </div>
   );
 }
 
 /* --------------------------- SIGN-IN VIEW --------------------------- */
 function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) {
+  const navigate = useNavigate();
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 relative">
+      {/* Council Login Button - top right */}
+      <button
+        className="absolute top-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold z-10"
+        onClick={() => navigate('/council-login')}
+      >
+        Council Login
+      </button>
       <div className="w-full max-w-sm bg-white shadow-sm rounded-2xl p-6 md:p-8">
         {/* Brand */}
         <div className="flex items-center justify-center gap-3 select-none">
