@@ -5,6 +5,7 @@ import Footer from "./Footer.jsx";
 import SignIn from "./SignIn.jsx";
 import commIcon from "./assets/comm.png";
 import MyGovIdBadge from "./MyGovIdBadge.jsx";
+import PageTranslator from "./PageTranslator.jsx";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 /**
@@ -81,6 +82,7 @@ export default function App() {
   {/* Fallback: redirect unknown routes to root */}
   <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
+  <PageTranslator />
   <Footer />
     </div>
   );

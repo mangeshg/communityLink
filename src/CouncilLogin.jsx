@@ -58,15 +58,17 @@ export default function CouncilLogin() {
 
           <form onSubmit={handleCouncilLogin} className="space-y-4">
             <div>
-              <label htmlFor="councilId" className="block text-sm font-medium text-neutral-700">Login ID</label>
-              <input
-                id="councilId"
-                type="text"
-                value={councilId}
-                onChange={e => setCouncilId(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-neutral-200 px-4 py-3 text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                autoFocus
-              />
+                <label htmlFor="councilId" className="block text-sm font-medium text-neutral-700">Username or email</label>
+                <input
+                  id="councilId"
+                  type="text"
+                  placeholder="you@example.com or username"
+                  autoComplete="username email"
+                  value={councilId}
+                  onChange={e => setCouncilId(e.target.value)}
+                  className="mt-1 w-full rounded-xl border border-neutral-200 px-4 py-3 text-base focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                  autoFocus
+                />
             </div>
             <div>
               <label htmlFor="councilPassword" className="block text-sm font-medium text-neutral-700">Password</label>
@@ -97,9 +99,8 @@ export default function CouncilLogin() {
               </button>
             </div>
 
-            <div className="flex justify-between text-sm text-neutral-500">
+            <div className="text-sm text-neutral-500">
               <a href="#" onClick={(e) => e.preventDefault()} className="hover:underline">Forgot password?</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); navigate('/council-dashboard'); }} className="hover:underline">Demo</a>
             </div>
           </form>
         </div>
