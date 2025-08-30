@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import CouncilLogin from "./CouncilLogin.jsx";
 import CouncilDashboard from "./CouncilDashboard.jsx";
+import Footer from "./Footer.jsx";
+import SignIn from "./SignIn.jsx";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 /**
@@ -76,7 +78,8 @@ export default function App() {
   <Route path="/submit-idea" element={<SubmitIdeaBot />} />
   {/* Fallback: redirect unknown routes to root */}
   <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+  </Routes>
+  <Footer />
     </div>
   );
 }
@@ -199,61 +202,7 @@ const preferencesList = [
   }
 ];
 
-/* --------------------------- SIGN-IN VIEW --------------------------- */
-function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) {
-  const navigate = useNavigate();
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 relative">
-      {/* Council Login Button - top right */}
-      <button
-        className="absolute top-6 right-6 bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition font-semibold z-10"
-        onClick={() => navigate('/council-login')}
-      >
-        Council Login
-      </button>
-      <div className="w-full max-w-sm bg-white shadow-sm rounded-2xl p-6 md:p-8">
-        {/* myGovID button */}
-        <button
-          type="button"
-          onClick={startMyGovIdFlow}
-          className="mt-6 w-full inline-flex items-center justify-center gap-3 rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base font-medium text-neutral-800 hover:border-neutral-400 hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-neutral-800/20 active:scale-[.99]"
-          aria-label="Sign in with myGovID"
-        >
-          <MyGovIdBadge className="h-7 w-7" />
-          <span>Sign in with myGovID</span>
-        </button>
-
-        {/* OR separator */}
-        <div className="mt-4 text-center text-neutral-500">or</div>
-
-        {/* Email field */}
-        <form onSubmit={onSubmit} className="mt-3">
-          <label htmlFor="email" className="block text-sm font-medium text-neutral-700">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="you@example.com"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 shadow-xs focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
-          />
-          {/* Hidden submit so Enter works */}
-          <button type="submit" className="sr-only">Continue</button>
-        </form>
-
-        {/* Tagline */}
-        <p className="mt-8 text-center text-sm leading-5 text-neutral-500">
-          Connecting communities for a
-          <br /> stronger future
-        </p>
-      </div>
-    </div>
-  );
-}
+/* SignIn view has been moved to `src/SignIn.jsx`. */
 
 /* -------------------------- DASHBOARD VIEW -------------------------- */
 function Dashboard({ onSignOut }) {
