@@ -1,5 +1,6 @@
 
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 const participationData = [
   {
@@ -100,9 +101,21 @@ function getActionPlan(row) {
 export default function CouncilDashboard() {
   // Debug log to help confirm component is mounted
   if (typeof window !== 'undefined') console.log('CouncilDashboard mounted');
+  const navigate = useNavigate();
+  function handleSignOut() {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('communityLink_signedIn');
+    }
+    navigate('/');
+  }
   return (
     <div className="min-h-screen w-full bg-neutral-50 flex flex-col items-center p-4 md:p-6">
-      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Council Area Participation Overview</h1>
+      <header className="w-full max-w-6xl flex items-center justify-between mb-6 px-4 md:px-0">
+        <h1 className="text-2xl md:text-3xl font-bold">Council Area Participation Overview</h1>
+        <div>
+          <button onClick={handleSignOut} className="rounded-lg border border-neutral-300 px-3 py-1 hover:bg-neutral-50">Sign out</button>
+        </div>
+      </header>
 
       {/* Participation Tiles */}
       <div className="w-full max-w-6xl px-4 md:px-0 grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

@@ -71,6 +71,8 @@ export default function App() {
         />
   <Route path="/council-login" element={<CouncilLogin />} />
   <Route path="/council-dashboard" element={<CouncilDashboard />} />
+  <Route path="/preferences" element={<Onboarding />} />
+  <Route path="/onboarding" element={<OnboardingFlow />} />
   <Route path="/submit-idea" element={<SubmitIdeaBot />} />
   {/* Fallback: redirect unknown routes to root */}
   <Route path="*" element={<Navigate to="/" replace />} />
@@ -300,7 +302,10 @@ function Dashboard({ onSignOut }) {
         <div className="flex items-center gap-3 text-sm text-neutral-600">
           <span className="hidden sm:inline">Welcome, Verified via myGovID</span>
           <MyGovIdBadge className="h-6 w-6 shrink-0" />
-          <button onClick={onSignOut} className="ml-1 rounded-lg border border-neutral-300 px-2 py-1 hover:bg-neutral-50">Sign out</button>
+          <div className="flex items-center gap-2">
+            <PreferencesButton />
+            <button onClick={onSignOut} className="ml-1 rounded-lg border border-neutral-300 px-2 py-1 hover:bg-neutral-50">Sign out</button>
+          </div>
         </div>
       </header>
 
@@ -689,5 +694,74 @@ function MyGovIdBadge({ className = "" }) {
         <text x="42" y="42" fontFamily="Inter, system-ui, Arial" fontSize="12" fontWeight="700">ID</text>
       </g>
     </svg>
+  );
+}
+
+function PreferencesButton() {
+  const navigate = useNavigate();
+  return (
+    <button
+      onClick={() => navigate('/preferences')}
+      className="rounded-lg border border-neutral-300 px-2 py-1 hover:bg-neutral-50 text-sm"
+    >
+      Preferences
+    </button>
+  );
+}
+
+function OnboardingFlow() {
+  const navigate = useNavigate();
+  const [linked, setLinked] = useState(false);
+  const [council, setCouncil] = useState('Central Park Council');
+
+  function handleLinkMyGov() {
+    // Mock linking flow
+    setLinked(true);
+    setTimeout(() => {
+      // pretend to fetch data and store link
+      localStorage.setItem('communityLink_myGovLinked', 'true');
+    }, 300);
+  }
+
+  function handleComplete() {
+    // Save council and proceed to preferences
+    localStorage.setItem('communityLink_council', council);
+    navigate('/preferences');
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-6 md:p-8">
+        <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Onboarding - Link myGov & Select Council</h1>
+
+        <div className="space-y-4">
+          <div>
+            <div className="font-semibold">Link with myGov</div>
+            <div className="text-sm text-neutral-600">Linking with myGov helps verify your identity so you can access council services.</div>
+            <div className="mt-3">
+              {!linked ? (
+                <button className="rounded-lg bg-blue-600 text-white px-4 py-2" onClick={handleLinkMyGov}>Link myGov</button>
+              ) : (
+                <div className="text-sm text-green-700">myGov linked ✓</div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <div className="font-semibold">Select your Council</div>
+            <div className="text-sm text-neutral-600">Choose the council or local area you belong to.</div>
+            <select value={council} onChange={(e) => setCouncil(e.target.value)} className="mt-2 rounded-md border px-3 py-2 w-full">
+              <option>Central Park Council</option>
+              <option>Northside Council</option>
+              <option>East End Council</option>
+            </select>
+          </div>
+
+          <div className="pt-4 flex justify-end">
+            <button className="rounded-lg bg-blue-600 text-white px-4 py-2" onClick={handleComplete}>Continue to Preferences</button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
