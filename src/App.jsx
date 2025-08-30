@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
 import CouncilLogin from "./CouncilLogin.jsx";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
 
 /**
  * CommunityLink demo app
@@ -10,16 +10,28 @@ import CouncilLogin from "./CouncilLogin.jsx";
  */
 export default function App() {
   const [email, setEmail] = useState("");
-  const [signedIn, setSignedIn] = useState(false);
+  const [signedIn, setSignedIn] = useState(() => {
+    // Check localStorage for login state
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("communityLink_signedIn") === "true";
+    }
+    return false;
+  });
 
   function startMyGovIdFlow() {
     setSignedIn(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("communityLink_signedIn", "true");
+    }
   }
 
   function onSubmit(e) {
     e.preventDefault();
     if (!email.trim()) return alert("Please enter your email");
     setSignedIn(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("communityLink_signedIn", "true");
+    }
   }
 
   return (
@@ -39,6 +51,7 @@ export default function App() {
           )}
         />
         <Route path="/council-login" element={<CouncilLogin />} />
+        <Route path="/submit-idea" element={<SubmitIdeaBot />} />
       </Routes>
     </div>
   );
@@ -111,6 +124,7 @@ function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) {
 
 /* -------------------------- DASHBOARD VIEW -------------------------- */
 function Dashboard({ onSignOut }) {
+  const navigate = useNavigate();
   return (
     <div className="max-w-6xl mx-auto px-4 py-5 md:py-8">
       {/* Header */}
@@ -148,7 +162,7 @@ function Dashboard({ onSignOut }) {
           <div className="mt-4 flex justify-end">
             <button
               className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2 hover:brightness-110 active:translate-y-[1px]"
-              onClick={() => alert('Submit New Idea functionality not implemented yet!')}
+              onClick={() => navigate("/submit-idea")}
             >
               + Submit My Idea
             </button>
@@ -175,6 +189,152 @@ function Dashboard({ onSignOut }) {
           </ul>
         </Card>
       </main>
+    </div>
+  );
+}
+
+/* -------------------------- SUBMIT IDEA BOT -------------------------- */
+function SubmitIdeaBot() {
+  const [idea, setIdea] = useState("");
+  const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);
+  const [history, setHistory] = useState([]);
+  const [completed, setCompleted] = useState(false);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setLoading(true);
+    // MOCK Gemini API response for demo purposes
+    setTimeout(() => {
+      const mockReply = `{
+        "title": "Upgrade Central Park",
+        "summary_160_chars": "Upgrade the central park with new playground equipment, lighting, and seating for families and children.",
+        "benefits": "• Safer play area • Improved lighting • More seating • Community engagement",
+        "estimated_scope": "medium",
+        "area": "Central Park",
+        "tags": ["park", "upgrade", "community", "children"],
+        "open_questions": ["What is the estimated budget?", "Which age groups will the playground target?"]
+      }`;
+      setSummary(mockReply);
+      setHistory([...history, { role: "assistant", content: mockReply }]);
+      setStep(step + 1);
+      setLoading(false);
+    }, 800);
+  }
+
+  function handleClarify() {
+    setIdea("");
+    setStep(step + 1);
+  }
+
+  function handleComplete() {
+    setCompleted(true);
+  }
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 p-4">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-6 md:p-8">
+        <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Submit Your Project Idea</h1>
+        {!summary && !completed && (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <label className="block text-sm font-medium text-neutral-700">Describe your council project idea:</label>
+            <textarea
+              className="w-full rounded-xl border border-neutral-300 px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 shadow-xs focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
+              rows={4}
+              value={idea}
+              onChange={(e) => setIdea(e.target.value)}
+              placeholder="E.g. Upgrade the central park with new playground equipment, lighting, and seating."
+              required
+            />
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-blue-600 text-white text-base px-4 py-2 font-medium hover:brightness-110 active:translate-y-[1px]"
+              disabled={loading}
+            >
+              {loading ? "Generating summary..." : step === 0 ? "Generate Summary" : "Refine Summary"}
+            </button>
+          </form>
+        )}
+        {summary && !completed && (
+          <div className="mt-6">
+            <div className="text-sm text-neutral-700 mb-2">AI-generated summary:</div>
+            <div className="bg-neutral-100 rounded-lg p-3 text-neutral-900 mb-2 whitespace-pre-wrap text-left">
+              {(() => {
+                try {
+                  const obj = JSON.parse(summary);
+                  return (
+                    <>
+                      <div><span className="font-semibold">Title:</span> {obj.title}</div>
+                      <div className="mt-2"><span className="font-semibold">Summary:</span> {obj.summary_160_chars}</div>
+                      <div className="mt-2"><span className="font-semibold">Benefits:</span> {obj.benefits}</div>
+                      <div className="mt-2"><span className="font-semibold">Estimated Scope:</span> {obj.estimated_scope}</div>
+                      <div className="mt-2"><span className="font-semibold">Area:</span> {obj.area}</div>
+                      <div className="mt-2"><span className="font-semibold">Tags:</span> {obj.tags?.join(", ")}</div>
+                      <div className="mt-2"><span className="font-semibold">Open Questions:</span>
+                        <ul className="list-disc ml-5">
+                          {obj.open_questions?.map((q, i) => <li key={i}>{q}</li>)}
+                        </ul>
+                      </div>
+                    </>
+                  );
+                } catch {
+                  return summary;
+                }
+              })()}
+            </div>
+            <div className="flex gap-2 justify-end">
+              <button
+                className="rounded-lg border border-neutral-300 text-neutral-700 text-sm px-3 py-1.5 hover:bg-neutral-50"
+                onClick={handleClarify}
+              >
+                Clarify / Edit Idea
+              </button>
+              <button
+                className="rounded-lg bg-green-600 text-white text-sm px-3 py-1.5 hover:brightness-110"
+                onClick={handleComplete}
+              >
+                Complete Submission
+              </button>
+            </div>
+          </div>
+        )}
+        {completed && (
+          <div className="mt-6 text-center">
+            <div className="text-green-700 font-bold mb-2">Your idea has been submitted!</div>
+            <div className="bg-neutral-100 rounded-lg p-3 text-neutral-900 mb-2">Thank you for your submission. Your idea will be reviewed and made available for community voting soon.</div>
+            <div className="flex flex-col items-center gap-3 mt-4">
+              <button
+                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2"
+                onClick={() => { setIdea(""); setSummary(""); setCompleted(false); setStep(0); setHistory([]); }}
+              >
+                Submit Another Idea
+              </button>
+              <button
+                className="rounded-lg bg-neutral-800 text-white text-sm px-4 py-2"
+                onClick={() => {
+                  setCompleted(false);
+                  setSummary("");
+                  setIdea("");
+                  setStep(0);
+                  setHistory([]);
+                  // Set signedIn to true so dashboard is shown
+                  if (typeof window !== "undefined") {
+                    window.history.replaceState({}, '', '/');
+                  }
+                  if (typeof window !== "undefined" && window.location.pathname === '/') {
+                    // If using state, you may need to trigger signedIn in parent
+                    // For now, reload to show dashboard
+                    window.location.reload();
+                  }
+                }}
+              >
+                Back to Main Page
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
