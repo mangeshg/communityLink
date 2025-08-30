@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import CouncilLogin from "./CouncilLogin.jsx";
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import CouncilDashboard from "./CouncilDashboard.jsx";
+import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 /**
  * CommunityLink demo app
@@ -68,8 +69,11 @@ export default function App() {
             />
           )}
         />
-        <Route path="/council-login" element={<CouncilLogin />} />
-        <Route path="/submit-idea" element={<SubmitIdeaBot />} />
+  <Route path="/council-login" element={<CouncilLogin />} />
+  <Route path="/council-dashboard" element={<CouncilDashboard />} />
+  <Route path="/submit-idea" element={<SubmitIdeaBot />} />
+  {/* Fallback: redirect unknown routes to root */}
+  <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
@@ -206,15 +210,6 @@ function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) {
         Council Login
       </button>
       <div className="w-full max-w-sm bg-white shadow-sm rounded-2xl p-6 md:p-8">
-        {/* Brand */}
-        <div className="flex items-center justify-center gap-3 select-none">
-          <CommunityLinkMark className="h-10 w-10" />
-          <span className="text-2xl font-semibold tracking-tight text-neutral-800">CommunityLink</span>
-        </div>
-
-        {/* Title */}
-        <h1 className="mt-8 text-center text-3xl font-bold tracking-tight text-neutral-900">Sign in</h1>
-
         {/* myGovID button */}
         <button
           type="button"

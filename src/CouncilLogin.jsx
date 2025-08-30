@@ -1,9 +1,11 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function CouncilLogin() {
   const [councilId, setCouncilId] = useState("");
   const [councilPassword, setCouncilPassword] = useState("");
   const [councilError, setCouncilError] = useState("");
+  const navigate = useNavigate();
 
   function handleCouncilLogin(e) {
     e.preventDefault();
@@ -12,7 +14,7 @@ export default function CouncilLogin() {
       return;
     }
     // Replace with real auth logic
-    alert(`Council Login successful for ${councilId}`);
+    navigate("/council-dashboard");
     setCouncilId("");
     setCouncilPassword("");
     setCouncilError("");
