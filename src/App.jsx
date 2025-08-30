@@ -3,6 +3,8 @@ import CouncilLogin from "./CouncilLogin.jsx";
 import CouncilDashboard from "./CouncilDashboard.jsx";
 import Footer from "./Footer.jsx";
 import SignIn from "./SignIn.jsx";
+import commIcon from "./assets/comm.png";
+import MyGovIdBadge from "./MyGovIdBadge.jsx";
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from "react-router-dom";
 
 /**
@@ -539,31 +541,32 @@ function Proposal({ title, showAuthor = true }) {
   const [showComment, setShowComment] = useState(false);
   const [comment, setComment] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false); // track whether this user has voted
   // Vote counters
   const [supportCount, setSupportCount] = useState(0);
   const [neutralCount, setNeutralCount] = useState(0);
   const [opposeCount, setOpposeCount] = useState(0);
+  // Initial random community votes to make data look realistic
+  const [initialVotes] = useState(() => Math.floor(Math.random() * 80) + 20);
 
   function handleSelect(option) {
+    if (hasVoted) return; // prevent changing selection after vote
     setSelected(option);
     setShowComment(true);
   }
 
   function handleDone() {
+    if (!selected) return; // nothing selected
     setSubmitted(true);
+    setHasVoted(true);
     // Increment vote counter
     if (selected === 'Support') setSupportCount(c => c + 1);
     if (selected === 'Neutral') setNeutralCount(c => c + 1);
     if (selected === 'Oppose') setOpposeCount(c => c + 1);
-    setTimeout(() => {
-      setShowComment(false);
-      setComment("");
-      setSelected(null);
-      setSubmitted(false);
-    }, 1200); // Hide after 1.2s
+    // keep the selected state so the chosen button stays highlighted
   }
 
-  const totalVotes = supportCount + neutralCount + opposeCount;
+  const totalVotes = supportCount + neutralCount + opposeCount + initialVotes;
 
   // determine a default author name when none provided
   const authors = ['Alex Johnson', 'Priya Singh', 'Jordan Lee', 'Samira Patel', 'Diego Ramirez'];
@@ -579,19 +582,22 @@ function Proposal({ title, showAuthor = true }) {
       </div>
       <div className="mt-2 flex items-center gap-2">
         <button
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Support' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
+          disabled={hasVoted}
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Support' ? 'bg-blue-600 text-white border-blue-600' : hasVoted ? 'bg-neutral-100 text-neutral-400 border-neutral-100 cursor-not-allowed' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
           onClick={() => handleSelect('Support')}
         >
           Support
         </button>
         <button
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Neutral' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
+          disabled={hasVoted}
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Neutral' ? 'bg-blue-600 text-white border-blue-600' : hasVoted ? 'bg-neutral-100 text-neutral-400 border-neutral-100 cursor-not-allowed' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
           onClick={() => handleSelect('Neutral')}
         >
           Neutral
         </button>
         <button
-          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Oppose' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
+          disabled={hasVoted}
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Oppose' ? 'bg-blue-600 text-white border-blue-600' : hasVoted ? 'bg-neutral-100 text-neutral-400 border-neutral-100 cursor-not-allowed' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
           onClick={() => handleSelect('Oppose')}
         >
           Oppose
@@ -599,9 +605,9 @@ function Proposal({ title, showAuthor = true }) {
       </div>
       {/* Only show total votes */}
       <div className="mt-2 text-xs text-neutral-600">
-        <span>Total Votes: <span className="font-bold text-neutral-900">{totalVotes}</span></span>
+        <span>Total Community Votes: <span className="font-bold text-neutral-900">{totalVotes}</span></span>
       </div>
-      {showComment && !submitted && (
+      {showComment && !submitted && !hasVoted && (
         <div className="animate-fade-in mt-3">
           <textarea
             className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-xs focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all duration-200"
@@ -831,43 +837,11 @@ function ServiceRow({ label, action }) {
 
 /* ------------------------------ Icons ------------------------------ */
 function CommunityLinkMark({ className = "" }) {
-  // Interconnected-circles mark reminiscent of the sign-in page
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <g stroke="#0EA47A" strokeWidth="4" strokeLinecap="round">
-        <circle cx="20" cy="20" r="8" fill="#10B981" stroke="#0EA47A" />
-        <circle cx="44" cy="20" r="8" fill="#34D399" stroke="#0EA47A" />
-        <circle cx="20" cy="44" r="8" fill="#34D399" stroke="#0EA47A" />
-        <circle cx="44" cy="44" r="8" fill="#10B981" stroke="#0EA47A" />
-        <path d="M28 20h8M20 28v8M44 28v8M28 44h8" />
-      </g>
-    </svg>
-  );
+  // Use the project's comm.png so the landing page and header share the same mark
+  return <img src={commIcon} alt="CommunityLink" className={className} />;
 }
 
-function MyGovIdBadge({ className = "" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 64 64"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <rect x="4" y="4" width="56" height="56" rx="10" fill="#0A8F5B" />
-      <g fill="white">
-        <text x="14" y="26" fontFamily="Inter, system-ui, Arial" fontSize="14" fontWeight="700">my</text>
-        <text x="14" y="42" fontFamily="Inter, system-ui, Arial" fontSize="12" fontWeight="700">Gov</text>
-        <text x="42" y="42" fontFamily="Inter, system-ui, Arial" fontSize="12" fontWeight="700">ID</text>
-      </g>
-    </svg>
-  );
-}
+// `MyGovIdBadge` moved to `src/MyGovIdBadge.jsx`
 
 function PreferencesButton() {
   const navigate = useNavigate();

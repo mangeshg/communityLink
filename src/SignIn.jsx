@@ -1,23 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-
-function MyGovIdBadge({ className = "" }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 64 64"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <rect x="4" y="4" width="56" height="56" rx="10" fill="#0A8F5B" />
-      <g fill="white">
-        <text x="14" y="26" fontFamily="Inter, system-ui, Arial" fontSize="14" fontWeight="700">my</text>
-        <text x="14" y="42" fontFamily="Inter, system-ui, Arial" fontSize="12" fontWeight="700">Gov</text>
-        <text x="42" y="42" fontFamily="Inter, system-ui, Arial" fontSize="12" fontWeight="700">ID</text>
-      </g>
-    </svg>
-  );
-}
+import MyGovIdBadge from "./MyGovIdBadge.jsx";
+import commIcon from "./assets/comm.png";
 
 export default function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) {
   const navigate = useNavigate();
@@ -35,7 +19,7 @@ export default function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) 
         {/* Left promo / brand */}
         <div className="hidden md:flex flex-col justify-center rounded-2xl p-8 bg-gradient-to-br from-sky-50 to-white">
           <div className="flex items-center gap-4 mb-6">
-            <MyGovIdBadge className="h-12 w-12" />
+            <img src={commIcon} alt="CommunityLink" className="h-12 w-12 object-contain rounded-md" />
             <div>
               <h2 className="text-2xl font-bold text-slate-900">CommunityLink</h2>
               <p className="text-sm text-slate-600">Connect, contribute and shape local services.</p>
