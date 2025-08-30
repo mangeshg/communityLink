@@ -1,0 +1,35 @@
+Bridging Social Divides: Bringing People Together to Strengthen Social Connections
+Jurisdiction: Australia
+#Strengthening-social-connections-for-community
+
+
+How can we bring people together from diverse backgrounds to communicate respectfully, even when they hold opposing views?
+
+Social cohesion, broadly speaking, is the 'glue' that binds society together. Societies with higher levels of social cohesion are healthier, more resilient to external shocks, and experience greater economic growth.
+We have seen that Australians pull together in times of crisis or natural disasters. Social cohesion in Australia has been resilient, but is currently under pressure, challenged primarily by the following drivers as defined by the Scanlon Institute’s Mapping Social Cohesion Research:
+- Belonging: the sense of pride and belonging people have in Australia and in Australian life and culture.
+- Worth: the degree of emotional and material well-being across society, as measured through levels of happiness and financial satisfaction.
+- Social inclusion and justice: perceptions of economic fairness in Australian society and trust in the Federal Government.
+- Participation: active engagement in political activities and the political process, including through voting, signing a petition, contacting Members of Parliament, and attending protests.
+- Acceptance and rejection: attitudes to immigrant diversity, support for ethnic minorities, and experience of discrimination.
+
+Australia's social cohesion is currently facing significant challenges, as highlighted by the Scanlon Foundation's 2023 and 2024 Mapping Social Cohesion reports. The Scanlon-Monash Index of Social Cohesion, which measures the strength of social bonds in the country, has declined to its lowest point since the survey's inception in 2007, reaching a score of 79 in 2023 and remaining at 78 in 2024.
+
+We invite participants to put forward ideas for how to strengthen social connections, enable respectful debate and protect people’s trust in government. Submissions could suggest ways to improve existing programs or outline new initiatives, and designs need to be easily introduced into a digital or local community within 6 to 12 months.
+
+Addressing the underlying pressures and fostering inclusive dialogues will be crucial in strengthening social cohesion across the community. This GovHack topic challenges participants to use evidence to create initiatives that address one or more of the following:
+- Create an innovative approach for local councils to strengthen community connections.
+- Help build people’s trust in government and government services.
+- Support people to ‘disagree better’ to enable a deeper understanding of shared values and respectful debate between people holding opposing views.
+- Create opportunities for community connection and improve people’s sense of belonging.
+
+In this challenge, you are expected to:
+- Develop ideas, present them as a mock-up and include evidence based analysis. Both the mock-up and analysis should show how the data is being used, or its potential use.
+- Use at least one government dataset.
+
+Specifically, the key features of the deliverable might include:
+- Identifying practical ideas that can be rolled out in the local community (by community groups or local government)
+- Presenting the initial design of the idea supported by data analysis and evidence to reinforce where and why the idea might work or is needed
+- Identification of what matters to keep people engaged at different ages and in different communities
+- A list of data sets that would be needed to advance the design or implementation of the solution
+- Suggestions on how the impact of the idea could be measured on its ability to increase trust in institutions, multiculturalism, diversity and acceptance, relationships with First Nations Australians, sense of belonging and engagement, and community connections and cultural understanding
