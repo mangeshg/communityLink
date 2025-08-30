@@ -315,7 +315,7 @@ function Dashboard({ onSignOut }) {
               className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2 hover:brightness-110 active:translate-y-[1px]"
               onClick={() => navigate("/submit-idea")}
             >
-              + Submit My Idea
+              + Share My Idea
             </button>
           </div>
         </Card>
@@ -356,139 +356,161 @@ function Dashboard({ onSignOut }) {
 /* -------------------------- SUBMIT IDEA BOT -------------------------- */
 function SubmitIdeaBot() {
   const [idea, setIdea] = useState("");
-  const [summary, setSummary] = useState("");
+  const [useAI, setUseAI] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0);
-  const [history, setHistory] = useState([]);
+  const [summary, setSummary] = useState(""); // raw AI response (JSON string)
+  const [structured, setStructured] = useState(null); // parsed object from AI
   const [completed, setCompleted] = useState(false);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  async function generateStructuredIdea(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!idea.trim()) return alert('Please enter your idea first');
+    if (!useAI) {
+      // If not using AI, create a simple structured object from free text
+      const simple = {
+        title: idea.split('\n')[0].slice(0, 60) || 'Community Idea',
+        summary_160_chars: idea.slice(0, 160),
+        benefits: '',
+        estimated_scope: 'small',
+        area: '',
+        tags: [],
+        open_questions: []
+      };
+      setStructured(simple);
+      setSummary(JSON.stringify(simple, null, 2));
+      return;
+    }
+
     setLoading(true);
-    // MOCK Gemini API response for demo purposes
+    // Mock AI - replace with real API call in production
     setTimeout(() => {
-      const mockReply = `{
-        "title": "Upgrade Fitzroy Gardens",
-        "summary_160_chars": "Upgrade Fitzroy Gardens with new playground equipment, lighting, and seating for families and children.",
-        "benefits": "• Safer play area • Improved lighting • More seating • Community engagement",
-        "estimated_scope": "medium",
-  "area": "Fitzroy Gardens",
-        "tags": ["park", "upgrade", "community", "children"],
-        "open_questions": ["What is the estimated budget?", "Which age groups will the playground target?"]
-      }`;
-      setSummary(mockReply);
-      setHistory([...history, { role: "assistant", content: mockReply }]);
-      setStep(step + 1);
+      const mockReply = {
+        title: idea.length > 40 ? idea.slice(0, 40) + '...' : (idea.split('\n')[0] || 'Community Idea'),
+        summary_160_chars: idea.slice(0, 160),
+        benefits: '• Increased community engagement • Improved local amenity',
+        estimated_scope: 'medium',
+        area: 'Local area',
+        tags: ['community', 'infrastructure'],
+        open_questions: ['What is the budget?', 'Who will maintain it?']
+      };
+      const json = JSON.stringify(mockReply, null, 2);
+      setSummary(json);
+      setStructured(mockReply);
       setLoading(false);
-    }, 800);
+    }, 900);
   }
 
-  function handleClarify() {
-    setIdea("");
-    setStep(step + 1);
-  }
-
-  function handleComplete() {
+  function handleSubmitStructured() {
+    // For demo, mark completed and clear states. In production, POST to backend.
     setCompleted(true);
+  }
+
+  function handleEditOriginal() {
+    setStructured(null);
+    setSummary("");
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 p-4">
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-6 md:p-8">
-  <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Submit Your Idea</h1>
-        {!summary && !completed && (
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <label className="block text-sm font-medium text-neutral-700">Describe your council project idea:</label>
-            <textarea
-              className="w-full rounded-xl border border-neutral-300 px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 shadow-xs focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
-              rows={4}
-              value={idea}
-              onChange={(e) => setIdea(e.target.value)}
-              placeholder="E.g. Upgrade Fitzroy Gardens with new playground equipment, lighting, and seating."
-              required
-            />
-            <button
-              type="submit"
-              className="w-full rounded-lg bg-blue-600 text-white text-base px-4 py-2 font-medium hover:brightness-110 active:translate-y-[1px]"
-              disabled={loading}
-            >
-              {loading ? "Generating summary..." : step === 0 ? "Generate Summary With AI" : "Refine Summary"}
-            </button>
+      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm p-6 md:p-8">
+  <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Share My Idea</h1>
+
+        {!structured && !completed && (
+          <form onSubmit={generateStructuredIdea} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-neutral-700">Describe your idea (free text)</label>
+              <textarea
+                className="w-full rounded-xl border border-neutral-300 px-4 py-3 text-base text-neutral-900 placeholder:text-neutral-400 shadow-xs focus:border-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
+                rows={8}
+                value={idea}
+                onChange={(e) => setIdea(e.target.value)}
+                placeholder="E.g. Upgrade Fitzroy Gardens with new playground equipment, lighting, and seating for families and children."
+              />
+
+              <div className="mt-4 flex items-center gap-3">
+                <label className="inline-flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={useAI} onChange={e => setUseAI(e.target.checked)} className="h-4 w-4" />
+                  Use AI to structure my idea
+                </label>
+                <button
+                  type="submit"
+                  className="ml-auto rounded-lg bg-blue-600 text-white text-sm px-4 py-2 hover:brightness-110"
+                  disabled={loading}
+                >
+                  {loading ? 'Structuring...' : 'Generate Structured Idea'}
+                </button>
+              </div>
+            </div>
+
+            <aside className="md:col-span-1 bg-neutral-50 rounded-lg p-4">
+              <div className="text-sm text-neutral-600 mb-2">Preview</div>
+              <div className="text-sm text-neutral-900 italic">Your free-text will be converted to a structured idea here.</div>
+              <div className="mt-3 text-xs text-neutral-500">Tip: Be specific about outcomes, locations and benefits for a better AI result.</div>
+            </aside>
           </form>
         )}
-        {summary && !completed && (
-          <div className="mt-6">
-            <div className="text-sm text-neutral-700 mb-2">AI-generated summary:</div>
-            <div className="bg-neutral-100 rounded-lg p-3 text-neutral-900 mb-2 whitespace-pre-wrap text-left">
-              {(() => {
-                try {
-                  const obj = JSON.parse(summary);
-                  return (
-                    <>
-                      <div><span className="font-semibold">Title:</span> {obj.title}</div>
-                      <div className="mt-2"><span className="font-semibold">Summary:</span> {obj.summary_160_chars}</div>
-                      <div className="mt-2"><span className="font-semibold">Benefits:</span> {obj.benefits}</div>
-                      <div className="mt-2"><span className="font-semibold">Estimated Scope:</span> {obj.estimated_scope}</div>
-                      <div className="mt-2"><span className="font-semibold">Area:</span> {obj.area}</div>
-                      <div className="mt-2"><span className="font-semibold">Tags:</span> {obj.tags?.join(", ")}</div>
-                      <div className="mt-2"><span className="font-semibold">Open Questions:</span>
-                        <ul className="list-disc ml-5">
-                          {obj.open_questions?.map((q, i) => <li key={i}>{q}</li>)}
-                        </ul>
-                      </div>
-                    </>
-                  );
-                } catch {
-                  return summary;
-                }
-              })()}
+
+        {structured && !completed && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <div className="text-sm text-neutral-700 mb-2">AI-generated structure (editable)</div>
+              <label className="block text-xs text-neutral-600">Title</label>
+              <input value={structured.title} onChange={e => setStructured({ ...structured, title: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-2" />
+              <label className="block text-xs text-neutral-600">Short summary</label>
+              <textarea value={structured.summary_160_chars} onChange={e => setStructured({ ...structured, summary_160_chars: e.target.value })} rows={3} className="w-full rounded-md border px-3 py-2 mb-2" />
+              <label className="block text-xs text-neutral-600">Benefits</label>
+              <textarea value={structured.benefits} onChange={e => setStructured({ ...structured, benefits: e.target.value })} rows={2} className="w-full rounded-md border px-3 py-2 mb-2" />
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs text-neutral-600">Estimated scope</label>
+                  <input value={structured.estimated_scope} onChange={e => setStructured({ ...structured, estimated_scope: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-2" />
+                </div>
+                <div>
+                  <label className="block text-xs text-neutral-600">Area</label>
+                  <input value={structured.area} onChange={e => setStructured({ ...structured, area: e.target.value })} className="w-full rounded-md border px-3 py-2 mb-2" />
+                </div>
+              </div>
+              <label className="block text-xs text-neutral-600">Tags (comma separated)</label>
+              <input value={structured.tags?.join(', ')} onChange={e => setStructured({ ...structured, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })} className="w-full rounded-md border px-3 py-2 mb-2" />
+              <label className="block text-xs text-neutral-600">Open questions</label>
+              <textarea value={structured.open_questions?.join('\n')} onChange={e => setStructured({ ...structured, open_questions: e.target.value.split('\n').map(s => s.trim()).filter(Boolean) })} rows={3} className="w-full rounded-md border px-3 py-2 mb-2" />
+
+              <div className="flex gap-2 justify-end mt-2">
+                <button className="rounded-lg border border-neutral-300 text-neutral-700 text-sm px-3 py-1.5 hover:bg-neutral-50" onClick={handleEditOriginal}>Edit original text</button>
+                <button className="rounded-lg bg-green-600 text-white text-sm px-3 py-1.5 hover:brightness-110" onClick={handleSubmitStructured}>Submit Structured Idea</button>
+              </div>
             </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                className="rounded-lg border border-neutral-300 text-neutral-700 text-sm px-3 py-1.5 hover:bg-neutral-50"
-                onClick={handleClarify}
-              >
-                Clarify / Edit Idea
-              </button>
-              <button
-                className="rounded-lg bg-green-600 text-white text-sm px-3 py-1.5 hover:brightness-110"
-                onClick={handleComplete}
-              >
-                Complete Submission
-              </button>
+
+            <div>
+              <div className="text-sm text-neutral-700 mb-2">Structured preview</div>
+              <div className="bg-neutral-100 rounded-lg p-4">
+                <div className="text-lg font-bold text-neutral-900 mb-2">{structured.title}</div>
+                <div className="text-sm text-neutral-700 mb-2">{structured.summary_160_chars}</div>
+                <div className="text-sm text-neutral-700 mb-2"><span className="font-semibold">Benefits:</span> {structured.benefits}</div>
+                <div className="text-sm text-neutral-700 mb-2"><span className="font-semibold">Scope:</span> {structured.estimated_scope}</div>
+                <div className="text-sm text-neutral-700 mb-2"><span className="font-semibold">Area:</span> {structured.area}</div>
+                <div className="text-sm text-neutral-700 mb-2"><span className="font-semibold">Tags:</span> {(structured.tags || []).join(', ')}</div>
+                {structured.open_questions?.length > 0 && (
+                  <div className="mt-2 text-sm"><span className="font-semibold">Open questions:</span>
+                    <ul className="list-disc ml-5">
+                      {structured.open_questions.map((q, i) => <li key={i}>{q}</li>)}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
+
         {completed && (
           <div className="mt-6 text-center">
             <div className="text-green-700 font-bold mb-2">Your idea has been submitted!</div>
             <div className="bg-neutral-100 rounded-lg p-3 text-neutral-900 mb-2">Thank you for your submission. Your idea will be reviewed and made available for community voting soon.</div>
             <div className="flex flex-col items-center gap-3 mt-4">
-              <button
-                className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2"
-                onClick={() => { setIdea(""); setSummary(""); setCompleted(false); setStep(0); setHistory([]); }}
-              >
-                Submit Another Idea
+              <button className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2" onClick={() => { setIdea(""); setSummary(""); setCompleted(false); setStructured(null); }}>
+                Share Another Idea
               </button>
-              <button
-                className="rounded-lg bg-neutral-800 text-white text-sm px-4 py-2"
-                onClick={() => {
-                  setCompleted(false);
-                  setSummary("");
-                  setIdea("");
-                  setStep(0);
-                  setHistory([]);
-                  // Set signedIn to true so dashboard is shown
-                  if (typeof window !== "undefined") {
-                    window.history.replaceState({}, '', '/');
-                  }
-                  if (typeof window !== "undefined" && window.location.pathname === '/') {
-                    // If using state, you may need to trigger signedIn in parent
-                    // For now, reload to show dashboard
-                    window.location.reload();
-                  }
-                }}
-              >
+              <button className="rounded-lg bg-neutral-800 text-white text-sm px-4 py-2" onClick={() => { setCompleted(false); setSummary(""); setIdea(""); setStructured(null); if (typeof window !== "undefined") window.location.replace('/'); }}>
                 Back to Main Page
               </button>
             </div>
