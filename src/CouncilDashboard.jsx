@@ -71,6 +71,9 @@ export default function CouncilDashboard() {
     }
   }, []);
 
+  // council name (from onboarding selection) with safe window check
+  const councilName = typeof window !== "undefined" ? (localStorage.getItem("communityLink_council") || "Your Council") : "Your Council";
+
   // Mock feedback data per project for the Feedback tab
   const feedbackProjects = React.useMemo(() => {
     return [
@@ -105,6 +108,7 @@ export default function CouncilDashboard() {
           <div className="text-sm text-neutral-600">Overview of community engagement and actions</div>
         </div>
         <div className="flex items-center gap-3">
+          <div className="text-lg md:text-xl font-semibold text-neutral-800">{councilName}</div>
           <button onClick={handleSignOut} className="rounded-lg border border-neutral-300 px-3 py-1 hover:bg-neutral-50">Sign out</button>
         </div>
       </header>

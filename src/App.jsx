@@ -278,9 +278,9 @@ function Dashboard({ onSignOut }) {
       title: "Community BBQ",
       date: "Sat, 14 Sep",
       time: "12:00pm - 3:00pm",
-      location: "Central Park Pavilion",
-      description: "Join us for a free BBQ with live music, games for kids, and a chance to meet your neighbors! Vegetarian options available.",
-      organizer: "Local Council",
+  location: "Fitzroy Gardens Pavilion",
+  description: "Join us for a free BBQ with live music, games for kids, and a chance to meet your neighbors! Vegetarian options available.",
+  organizer: "City of Melbourne",
       contact: "events@communitylink.org"
     },
     "Cultural Festival": {
@@ -356,7 +356,7 @@ function Dashboard({ onSignOut }) {
         <Card>
           <CardTitle>Community Innovation Hub</CardTitle>
           <div className="mt-3 space-y-5">
-            <Proposal title="Central Park Upgrade ($2M)" />
+            <Proposal title="Fitzroy Gardens Upgrade ($2M)" />
             <Proposal title="Community Garden ($50K)" />
           </div>
           <div className="mt-4 flex justify-end">
@@ -392,7 +392,7 @@ function Dashboard({ onSignOut }) {
         <Card>
           <CardTitle>Your Actions</CardTitle>
           <ul className="mt-3 space-y-2 text-sm text-neutral-700">
-            <li className="flex items-start gap-2"><span>✓</span><span>Voted on Centralpark Upgrade</span></li>
+            <li className="flex items-start gap-2"><span>✓</span><span>Voted on Fitzroy Gardens Upgrade</span></li>
             <li className="flex items-start gap-2"><span>✓</span><span>Registered for Cultural Festival</span></li>
             <li className="flex items-start gap-2 opacity-80"><span>•</span><span>Apply for Parking Permit</span></li>
           </ul>
@@ -417,11 +417,11 @@ function SubmitIdeaBot() {
     // MOCK Gemini API response for demo purposes
     setTimeout(() => {
       const mockReply = `{
-        "title": "Upgrade Central Park",
-        "summary_160_chars": "Upgrade the central park with new playground equipment, lighting, and seating for families and children.",
+        "title": "Upgrade Fitzroy Gardens",
+        "summary_160_chars": "Upgrade Fitzroy Gardens with new playground equipment, lighting, and seating for families and children.",
         "benefits": "• Safer play area • Improved lighting • More seating • Community engagement",
         "estimated_scope": "medium",
-        "area": "Central Park",
+  "area": "Fitzroy Gardens",
         "tags": ["park", "upgrade", "community", "children"],
         "open_questions": ["What is the estimated budget?", "Which age groups will the playground target?"]
       }`;
@@ -453,7 +453,7 @@ function SubmitIdeaBot() {
               rows={4}
               value={idea}
               onChange={(e) => setIdea(e.target.value)}
-              placeholder="E.g. Upgrade the central park with new playground equipment, lighting, and seating."
+              placeholder="E.g. Upgrade Fitzroy Gardens with new playground equipment, lighting, and seating."
               required
             />
             <button
@@ -1002,7 +1002,7 @@ function SearchableCouncilSelect({ value, onChange, councils = victoriaCouncils 
 function OnboardingFlow() {
   const navigate = useNavigate();
   const [linked, setLinked] = useState(false);
-  const [council, setCouncil] = useState('Central Park Council');
+  const [council, setCouncil] = useState('City of Melbourne');
 
   function handleLinkMyGov() {
     // Mock linking flow
