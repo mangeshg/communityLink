@@ -442,7 +442,7 @@ function SubmitIdeaBot() {
               className="w-full rounded-lg bg-blue-600 text-white text-base px-4 py-2 font-medium hover:brightness-110 active:translate-y-[1px]"
               disabled={loading}
             >
-              {loading ? "Generating summary..." : step === 0 ? "Generate Summary" : "Refine Summary"}
+              {loading ? "Generating summary..." : step === 0 ? "Generate Summary With AI" : "Refine Summary"}
             </button>
           </form>
         )}
