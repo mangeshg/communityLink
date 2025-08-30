@@ -37,18 +37,28 @@ const mockProjects = [
     id: 'proj-1',
     title: 'Central Park Upgrade',
     demographics: {
-      age: { '18-25': 30, '26-40': 50, '41-60': 30, '60+': 10 },
-      sex: { Male: 60, Female: 60 },
-      ethnicity: { Multicultural: 80, Other: 40 }
+      age: {
+        '18-25': { support: 18, neutral: 8, oppose: 4 },
+        '26-40': { support: 30, neutral: 12, oppose: 8 },
+        '41-60': { support: 18, neutral: 8, oppose: 4 },
+        '60+':   { support: 6, neutral: 3, oppose: 1 }
+      },
+      sex: { Male: { support: 35, neutral: 15, oppose: 10 }, Female: { support: 37, neutral: 13, oppose: 10 } },
+      ethnicity: { Multicultural: { support: 50, neutral: 20, oppose: 10 }, Other: { support: 22, neutral: 8, oppose: 4 } }
     }
   },
   {
     id: 'proj-2',
     title: 'New Library Construction',
     demographics: {
-      age: { '18-25': 10, '26-40': 40, '41-60': 30, '60+': 20 },
-      sex: { Male: 45, Female: 55 },
-      ethnicity: { Multicultural: 50, Other: 50 }
+      age: {
+        '18-25': { support: 4, neutral: 4, oppose: 2 },
+        '26-40': { support: 24, neutral: 10, oppose: 6 },
+        '41-60': { support: 18, neutral: 8, oppose: 4 },
+        '60+':   { support: 12, neutral: 6, oppose: 2 }
+      },
+      sex: { Male: { support: 22, neutral: 13, oppose: 10 }, Female: { support: 28, neutral: 13, oppose: 10 } },
+      ethnicity: { Multicultural: { support: 30, neutral: 10, oppose: 10 }, Other: { support: 20, neutral: 16, oppose: 10 } }
     }
   }
 ];
@@ -58,18 +68,18 @@ const mockIdeas = [
     id: 'idea-1',
     title: 'Community Garden',
     demographics: {
-      age: { '18-25': 12, '26-40': 20, '41-60': 10, '60+': 8 },
-      sex: { Male: 25, Female: 25 },
-      ethnicity: { Multicultural: 30, Other: 20 }
+      age: { '18-25': { support: 6, neutral: 4, oppose: 2 }, '26-40': { support: 12, neutral: 6, oppose: 2 }, '41-60': { support: 6, neutral: 3, oppose: 1 }, '60+': { support: 4, neutral: 3, oppose: 1 } },
+      sex: { Male: { support: 12, neutral: 6, oppose: 7 }, Female: { support: 13, neutral: 7, oppose: 5 } },
+      ethnicity: { Multicultural: { support: 20, neutral: 8, oppose: 2 }, Other: { support: 6, neutral: 4, oppose: 2 } }
     }
   },
   {
     id: 'idea-2',
     title: 'Road Safety Initiative',
     demographics: {
-      age: { '18-25': 8, '26-40': 30, '41-60': 20, '60+': 12 },
-      sex: { Male: 35, Female: 35 },
-      ethnicity: { Multicultural: 40, Other: 30 }
+      age: { '18-25': { support: 3, neutral: 3, oppose: 2 }, '26-40': { support: 18, neutral: 8, oppose: 4 }, '41-60': { support: 12, neutral: 6, oppose: 2 }, '60+': { support: 6, neutral: 4, oppose: 2 } },
+      sex: { Male: { support: 18, neutral: 10, oppose: 7 }, Female: { support: 17, neutral: 9, oppose: 6 } },
+      ethnicity: { Multicultural: { support: 25, neutral: 10, oppose: 5 }, Other: { support: 10, neutral: 6, oppose: 3 } }
     }
   }
 ];
@@ -91,33 +101,23 @@ export default function CouncilDashboard() {
   // Debug log to help confirm component is mounted
   if (typeof window !== 'undefined') console.log('CouncilDashboard mounted');
   return (
-    <div className="min-h-screen w-full bg-neutral-50 flex flex-col items-center p-6">
-      <h1 className="text-2xl font-bold mb-6 text-center">Council Area Participation Overview</h1>
+    <div className="min-h-screen w-full bg-neutral-50 flex flex-col items-center p-4 md:p-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Council Area Participation Overview</h1>
 
-          {/* Participation Tiles */}
-          <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <ParticipationTile
-              title="Council Project Participation"
-              mode="project"
-            />
+      {/* Participation Tiles */}
+      <div className="w-full max-w-6xl px-4 md:px-0 grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <ParticipationTile
+          title="Council Project Participation"
+          mode="project"
+        />
 
-            <ParticipationTile
-              title="Community Ideas Participation"
-              mode="idea"
-            />
-          </div>
-
-      {/* Action Plans */}
-      <div className="w-full max-w-3xl bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-bold mb-4">Council Action Plans</h2>
-        <ul className="space-y-4">
-          {participationData.map((row) => (
-            <li key={row.area} className="border-l-4 border-blue-600 pl-4">
-              <span className="font-semibold text-blue-700">{row.area}:</span> {getActionPlan(row)}
-            </li>
-          ))}
-        </ul>
+        <ParticipationTile
+          title="Community Ideas Participation"
+          mode="idea"
+        />
       </div>
+
+      {/* removed separate Action Plans - now shown inside project tile */}
     </div>
   );
 }
@@ -128,7 +128,72 @@ function ParticipationTile({ title, mode = 'project' }) {
   const [selectedId, setSelectedId] = React.useState(items[0]?.id || null);
   const current = items.find((i) => i.id === selectedId) || items[0] || { demographics: {} };
 
-  const totalVotes = Object.values(current.demographics?.age || {}).reduce((s, v) => s + v, 0);
+  function sumDemographicTotals(demo) {
+    if (!demo) return 0;
+    // prefer age, then sex, then ethnicity (any present breakdown will give a total)
+    const fields = ['age', 'sex', 'ethnicity'];
+    for (const f of fields) {
+      const obj = demo[f];
+      if (obj && typeof obj === 'object') {
+        return Object.values(obj).reduce((s, v) => {
+          if (typeof v === 'number') return s + v; // backward-compat numeric bucket
+          return s + (v.support || 0) + (v.neutral || 0) + (v.oppose || 0);
+        }, 0);
+      }
+    }
+    return 0;
+  }
+
+  const totalVotes = sumDemographicTotals(current.demographics);
+
+  function deriveProjectRowFromDemographics(demo) {
+    // Build a small row object compatible with getActionPlan
+    const row = { culture: 'Multicultural', age: 'All', sex: 'All' };
+    if (!demo) return row;
+
+    // Determine dominant age bucket
+    if (demo.age && typeof demo.age === 'object') {
+      const ageEntries = Object.entries(demo.age).map(([k, v]) => [k, (typeof v === 'number' ? v : (v.support || 0) + (v.neutral || 0) + (v.oppose || 0))]);
+      ageEntries.sort((a, b) => b[1] - a[1]);
+      if (ageEntries.length) row.age = ageEntries[0][0];
+    }
+
+    // Determine dominant sex bucket
+    if (demo.sex && typeof demo.sex === 'object') {
+      const sexEntries = Object.entries(demo.sex).map(([k, v]) => [k, (typeof v === 'number' ? v : (v.support || 0) + (v.neutral || 0) + (v.oppose || 0))]);
+      sexEntries.sort((a, b) => b[1] - a[1]);
+      if (sexEntries.length) row.sex = sexEntries[0][0];
+    }
+
+    // Determine culture: prefer ethnicity majority if present, else fallback to age heuristic
+    if (demo.ethnicity && typeof demo.ethnicity === 'object') {
+      const ethEntries = Object.entries(demo.ethnicity).map(([k, v]) => [k, (typeof v === 'number' ? v : (v.support || 0) + (v.neutral || 0) + (v.oppose || 0))]);
+      ethEntries.sort((a, b) => b[1] - a[1]);
+      if (ethEntries.length) {
+        const topKey = ethEntries[0][0];
+        if (topKey.toLowerCase().includes('multicultural')) row.culture = 'Multicultural';
+        else if (topKey.toLowerCase().includes('youth')) row.culture = 'Youth';
+        else if (topKey.toLowerCase().includes('senior')) row.culture = 'Seniors';
+        else row.culture = 'Multicultural';
+      }
+    } else {
+      try {
+        if (typeof row.age === 'string') {
+          if (row.age.includes('18') || row.age.includes('26') || row.age.includes('40')) row.culture = 'Youth';
+          else if (row.age.includes('60')) row.culture = 'Seniors';
+          else row.culture = 'Multicultural';
+        }
+      } catch (e) {}
+    }
+
+    return row;
+  }
+
+  // Recompute action plan when selected changes
+  const projectActionPlan = React.useMemo(() => {
+    if (mode !== 'project') return null;
+    return getActionPlan(deriveProjectRowFromDemographics(current.demographics));
+  }, [selectedId, mode, current?.demographics ? JSON.stringify(current.demographics) : null]);
 
   function breakdownEntries(field) {
     if (!current.demographics) return [];
@@ -139,8 +204,9 @@ function ParticipationTile({ title, mode = 'project' }) {
   }
 
   const raw = breakdownEntries(breakdown);
-  const breakdownData = raw.sort((a, b) => b[1] - a[1]);
-  const maxVal = breakdownData.length ? Math.max(...breakdownData.map(([, v]) => v)) : 1;
+  // raw entries are [label, {support, neutral, oppose}]
+  const breakdownData = raw.sort((a, b) => (b[1].support + b[1].neutral + b[1].oppose) - (a[1].support + a[1].neutral + a[1].oppose));
+  const maxVal = breakdownData.length ? Math.max(...breakdownData.map(([, v]) => v.support + v.neutral + v.oppose)) : 1;
 
   return (
     <div className="bg-white rounded-xl shadow p-5">
@@ -166,17 +232,31 @@ function ParticipationTile({ title, mode = 'project' }) {
       </div>
 
       <div className="mt-4 space-y-3">
-        {breakdownData.map(([label, value]) => (
-          <div key={label} className="flex items-center gap-3">
-            <div className="w-36 text-sm text-neutral-700">{label}</div>
-            <div className="flex-1 bg-neutral-100 rounded-full h-4 overflow-hidden">
-              <div className="h-4 bg-blue-600" style={{ width: `${(value / maxVal) * 100}%` }} />
+        {breakdownData.map(([label, val]) => {
+          const total = val.support + val.neutral + val.oppose;
+          return (
+            <div key={label} className="flex items-center gap-3">
+              <div className="w-36 text-sm text-neutral-700">{label}</div>
+              <div className="flex-1 bg-neutral-100 rounded-full h-4 overflow-hidden flex">
+                <div className="h-4 bg-green-500" style={{ width: `${(val.support / maxVal) * 100}%` }} />
+                <div className="h-4 bg-yellow-400" style={{ width: `${(val.neutral / maxVal) * 100}%` }} />
+                <div className="h-4 bg-red-500" style={{ width: `${(val.oppose / maxVal) * 100}%` }} />
+              </div>
+              <div className="w-20 text-right text-sm font-semibold">{total}</div>
             </div>
-            <div className="w-12 text-right text-sm font-semibold">{value}</div>
-          </div>
-        ))}
+          );
+        })}
         {breakdownData.length === 0 && <div className="text-sm text-neutral-500">No data</div>}
       </div>
+      {/* Project-specific action plan when viewing projects */}
+      {mode === 'project' && (
+        <div className="mt-4 p-4 bg-blue-50 rounded-md border border-blue-100">
+          <div className="text-sm text-neutral-600">Action Plan (based on selected project demographics):</div>
+          <div className="mt-2 text-sm font-medium text-blue-800">
+            {projectActionPlan}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
