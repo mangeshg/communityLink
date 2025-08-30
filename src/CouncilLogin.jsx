@@ -23,7 +23,7 @@ export default function CouncilLogin() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50">
       <div className="w-full max-w-sm bg-white shadow-sm rounded-2xl p-6 md:p-8">
-        <h2 className="text-2xl font-bold mb-4 text-center">Council Login</h2>
+  <h2 className="text-2xl font-bold mb-4 text-center">OneCouncil</h2>
         <form onSubmit={handleCouncilLogin} className="space-y-4">
           <div>
             <label htmlFor="councilId" className="block text-sm font-medium text-neutral-700">Login ID</label>

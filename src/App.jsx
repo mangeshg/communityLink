@@ -259,6 +259,18 @@ function SignIn({ email, setEmail, onSubmit, startMyGovIdFlow }) {
 function Dashboard({ onSignOut }) {
   const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [councilName, setCouncilName] = useState(() => {
+    if (typeof window !== 'undefined') return localStorage.getItem('communityLink_council') || '';
+    return '';
+  });
+
+  React.useEffect(() => {
+    function handleStorage(e) {
+      if (e.key === 'communityLink_council') setCouncilName(e.newValue || '');
+    }
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   // Event details (mock data)
   const eventDetails = {
@@ -297,7 +309,14 @@ function Dashboard({ onSignOut }) {
       <header className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <CommunityLinkMark className="h-7 w-7" />
-          <h1 className="text-lg md:text-xl font-semibold tracking-tight text-neutral-800">CommunityLink</h1>
+          <div>
+            <h1 className="text-lg md:text-xl font-semibold tracking-tight text-neutral-800">CommunityLink</h1>
+            {councilName ? (
+              <div className="text-sm text-neutral-500">{councilName}</div>
+            ) : (
+              <div className="text-sm text-neutral-400">No council selected</div>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-3 text-sm text-neutral-600">
           <span className="hidden sm:inline">Welcome, Verified via myGovID</span>
@@ -335,7 +354,7 @@ function Dashboard({ onSignOut }) {
 
         {/* Community Project Ideas */}
         <Card>
-          <CardTitle>Community Project Ideas</CardTitle>
+          <CardTitle>Community Innovation Hub</CardTitle>
           <div className="mt-3 space-y-5">
             <Proposal title="Central Park Upgrade ($2M)" />
             <Proposal title="Community Garden ($50K)" />
@@ -352,10 +371,10 @@ function Dashboard({ onSignOut }) {
 
         {/* Council Projects */}
         <Card>
-          <CardTitle>Council Projects</CardTitle>
+          <CardTitle>Your Voice in Council Projects</CardTitle>
           <div className="mt-3 space-y-5">
-            <Proposal title="New Library Construction ($5M)" />
-            <Proposal title="Road Safety Initiative ($500K)" />
+            <Proposal title="New Library Construction ($5M)" showAuthor={false} />
+            <Proposal title="Road Safety Initiative ($500K)" showAuthor={false} />
           </div>
         </Card>
 
@@ -425,7 +444,7 @@ function SubmitIdeaBot() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 p-4">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-6 md:p-8">
-        <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Submit Your Project Idea</h1>
+  <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Submit Your Idea</h1>
         {!summary && !completed && (
           <form onSubmit={handleSubmit} className="space-y-4">
             <label className="block text-sm font-medium text-neutral-700">Describe your council project idea:</label>
@@ -566,7 +585,7 @@ function EventDetails({ event, onBack }) {
   );
 }
 
-function Proposal({ title }) {
+function Proposal({ title, showAuthor = true }) {
   const [selected, setSelected] = useState(null);
   const [showComment, setShowComment] = useState(false);
   const [comment, setComment] = useState("");
@@ -597,9 +616,18 @@ function Proposal({ title }) {
 
   const totalVotes = supportCount + neutralCount + opposeCount;
 
+  // determine a default author name when none provided
+  const authors = ['Alex Johnson', 'Priya Singh', 'Jordan Lee', 'Samira Patel', 'Diego Ramirez'];
+  const authorName = authors[title.length % authors.length];
+
   return (
     <div className="mb-6">
-      <div className="text-neutral-900 font-medium mb-1">{title}</div>
+      <div className="mb-1 flex items-baseline justify-between">
+        <div className="text-neutral-900 font-medium">{title}</div>
+        {showAuthor && (
+          <div className="text-sm italic text-neutral-500">Idea submitted by {authorName}</div>
+        )}
+      </div>
       <div className="mt-2 flex items-center gap-2">
         <button
           className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Support' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
@@ -649,6 +677,201 @@ function Proposal({ title }) {
 }
 
 function ServiceRow({ label, action }) {
+  const [showDate, setShowDate] = useState(false);
+  const [date, setDate] = useState('');
+  const [requested, setRequested] = useState(false);
+
+  // Special inline flow for Waste Collection
+  if (label === 'Waste Collection') {
+    if (requested) {
+      return (
+        <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+          <div className="text-neutral-900">{label}</div>
+          <div className="text-sm text-green-700 font-semibold">Waste collection Requested</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0 gap-3">
+        <div className="text-neutral-900">{label}</div>
+        <div className="flex items-center gap-2">
+          {!showDate ? (
+            <button
+              onClick={() => setShowDate(true)}
+              className="rounded-lg border border-neutral-300 text-neutral-700 text-xs md:text-sm px-3 py-1.5 hover:bg-neutral-50"
+            >
+              {action}
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="rounded-md border px-2 py-1 text-sm"
+              />
+              <button
+                onClick={() => {
+                  if (!date) return; // ignore empty
+                  setRequested(true);
+                }}
+                className="rounded-lg bg-blue-600 text-white text-xs md:text-sm px-3 py-1.5"
+              >
+                Submit
+              </button>
+              <button
+                onClick={() => { setShowDate(false); setDate(''); }}
+                className="rounded-lg border border-neutral-300 text-neutral-700 text-xs md:text-sm px-3 py-1.5 hover:bg-neutral-50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Inline flow for Parking Permit
+  if (label === 'Parking Permit') {
+    const [showForm, setShowForm] = useState(false);
+    const [duration, setDuration] = useState('1'); // years
+    const [applied, setApplied] = useState(false);
+
+    const feePerYear = 120; // example fee
+    const totalFee = feePerYear * Number(duration || 1);
+
+    if (applied) {
+      return (
+        <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+          <div className="text-neutral-900">{label}</div>
+          <div className="text-sm text-green-700 font-semibold">Parking permit applied — Charges are applied against your card.</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0 gap-3">
+        <div className="text-neutral-900">{label}</div>
+        <div className="flex items-center gap-2">
+          {!showForm ? (
+            <button
+              onClick={() => setShowForm(true)}
+              className="rounded-lg border border-neutral-300 text-neutral-700 text-xs md:text-sm px-3 py-1.5 hover:bg-neutral-50"
+            >
+              {action}
+            </button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <label className="text-sm">Interval:</label>
+              <select value={duration} onChange={(e) => setDuration(e.target.value)} className="rounded-md border px-2 py-1 text-sm">
+                <option value="1">1 year</option>
+                <option value="2">2 years</option>
+              </select>
+              <div className="text-sm text-neutral-700">Fee: <span className="font-semibold">${totalFee}</span></div>
+              <button
+                onClick={() => setApplied(true)}
+                className="rounded-lg bg-blue-600 text-white text-xs md:text-sm px-3 py-1.5"
+              >
+                Submit
+              </button>
+              <button
+                onClick={() => { setShowForm(false); setDuration('1'); }}
+                className="rounded-lg border border-neutral-300 text-neutral-700 text-xs md:text-sm px-3 py-1.5 hover:bg-neutral-50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Inline flow for Rates Payment
+  if (label === 'Rates Payment') {
+    const [paid, setPaid] = useState(null);
+    const [showAmount, setShowAmount] = useState(false);
+    const [amount, setAmount] = useState(null);
+    const [submitted, setSubmitted] = useState(false);
+
+    React.useEffect(() => {
+      // Randomly decide paid status once on mount
+      const isPaid = Math.random() < 0.5;
+      setPaid(isPaid);
+    }, []);
+
+    if (paid === null) {
+      // still deciding
+      return (
+        <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+          <div className="text-neutral-900">{label}</div>
+          <div className="text-sm text-neutral-500">Checking status...</div>
+        </div>
+      );
+    }
+
+    if (paid) {
+      return (
+        <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+          <div className="text-neutral-900">{label}</div>
+          <div className="text-sm text-green-700 font-semibold">Paid</div>
+        </div>
+      );
+    }
+
+    // Not paid flow
+    if (submitted) {
+      return (
+        <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
+          <div className="text-neutral-900">{label}</div>
+          <div className="text-sm text-green-700 font-semibold">Rates Paid , Charged are applied to your card</div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0 gap-3">
+        <div className="text-neutral-900">{label}</div>
+        <div className="flex items-center gap-2">
+          {!showAmount ? (
+            <>
+              <div className="text-sm text-red-600">Not Paid</div>
+              <button
+                onClick={() => {
+                  // generate an outstanding amount and show it
+                  const amt = (Math.floor(Math.random() * 4500) + 100) / 1; // between 100 and 4599
+                  setAmount(amt.toFixed(2));
+                  setShowAmount(true);
+                }}
+                className="rounded-lg border border-neutral-300 text-neutral-700 text-xs md:text-sm px-3 py-1.5 hover:bg-neutral-50"
+              >
+                {action}
+              </button>
+            </>
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="text-sm text-neutral-700">Outstanding: <span className="font-semibold">${amount}</span></div>
+              <button
+                onClick={() => { setSubmitted(true); setPaid(true); }}
+                className="rounded-lg bg-blue-600 text-white text-xs md:text-sm px-3 py-1.5"
+              >
+                Submit
+              </button>
+              <button
+                onClick={() => { setShowAmount(false); setAmount(null); }}
+                className="rounded-lg border border-neutral-300 text-neutral-700 text-xs md:text-sm px-3 py-1.5 hover:bg-neutral-50"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-between py-3 first:pt-0 last:pb-0">
       <div className="text-neutral-900">{label}</div>
@@ -709,6 +932,73 @@ function PreferencesButton() {
   );
 }
 
+// Simplified list of Victorian councils (common names). Add or edit as needed.
+const victoriaCouncils = [
+  'Alpine Shire', 'Ararat Rural City', 'Ballarat City', 'Banyule City', 'Bass Coast Shire', 'Baw Baw Shire',
+  'Benalla Rural City', 'Boroondara City', 'Brimbank City', 'Buloke Shire', 'Campaspe Shire', 'Cardinia Shire',
+  'Casey City', 'Central Goldfields Shire', 'Colac Otway Shire', 'Corangamite Shire', 'Darebin City',
+  'East Gippsland Shire', 'Gannawarra Shire', 'Glen Eira City', 'Glenelg Shire', 'Golden Plains Shire',
+  'Greater Bendigo City', 'Greater Dandenong City', 'Greater Geelong City', 'Greater Shepparton City',
+  'Hepburn Shire', 'Hindmarsh Shire', 'Hobsons Bay City', 'Horsham Rural City', 'Hume City', 'Indigo Shire',
+  'Kingston City', 'Knox City', 'Latrobe City', 'Loddon Shire', 'Macedon Ranges Shire', 'Manningham City',
+  'Mansfield Shire', 'Maribyrnong City', 'Maroondah City', 'Melbourne City', 'Melton City', 'Mildura Rural City',
+  'Mitchell Shire', 'Moira Shire', 'Monash City', 'Moonee Valley City', 'Moorabool Shire', 'Merri-bek City',
+  'Mornington Peninsula Shire', 'Mount Alexander Shire', 'Moyne Shire', 'Murrindindi Shire', 'Nillumbik Shire',
+  'Northern Grampians Shire', 'Port Phillip City', 'Pyrenees Shire', 'South Gippsland Shire',
+  'Southern Grampians Shire', 'Stonnington City', 'Strathbogie Shire', 'Surf Coast Shire', 'Swan Hill Rural City',
+  'Towong Shire', 'Wangaratta Rural City', 'Warrnambool City', 'Wellington Shire', 'West Wimmera Shire',
+  'Whitehorse City', 'Whittlesea City', 'Wodonga City', 'Wyndham City', 'Yarra City', 'Yarra Ranges Shire',
+  'Yarriambiack Shire'
+];
+
+function SearchableCouncilSelect({ value, onChange, councils = victoriaCouncils }) {
+  const [query, setQuery] = React.useState('');
+  const [open, setOpen] = React.useState(false);
+
+  const filtered = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return councils.slice(0, 12);
+    return councils.filter(c => c.toLowerCase().includes(q)).slice(0, 12);
+  }, [query, councils]);
+
+  React.useEffect(() => {
+    // keep query in sync with selected value
+    setQuery(value || '');
+  }, [value]);
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        value={query}
+        placeholder="Search councils in Victoria..."
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+        onFocus={() => setOpen(true)}
+        className="w-full rounded-md border px-3 py-2"
+        aria-label="Search councils"
+      />
+      {open && (
+        <div className="absolute z-20 left-0 right-0 mt-1 bg-white border rounded-md shadow max-h-56 overflow-auto">
+          {filtered.length === 0 ? (
+            <div className="p-3 text-sm text-neutral-500">No councils found</div>
+          ) : (
+            filtered.map((c) => (
+              <div
+                key={c}
+                role="button"
+                onClick={() => { onChange(c); setOpen(false); }}
+                className="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+              >
+                {c}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function OnboardingFlow() {
   const navigate = useNavigate();
   const [linked, setLinked] = useState(false);
@@ -732,9 +1022,19 @@ function OnboardingFlow() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-sm p-6 md:p-8">
-        <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Onboarding - Link myGov & Select Council</h1>
+        <h1 className="text-2xl font-bold mb-1 text-neutral-900 text-center">OneCouncil</h1>
+        <div className="text-sm text-neutral-600 mb-4 text-center">Link your myGov account and select your council</div>
+
 
         <div className="space-y-4">
+          <div>
+            <div className="font-semibold">Select your Council</div>
+            <div className="text-sm text-neutral-600">Choose the council or local area you belong to.</div>
+            <div className="mt-2">
+              <SearchableCouncilSelect value={council} onChange={(c) => setCouncil(c)} />
+            </div>
+          </div>
+
           <div>
             <div className="font-semibold">Link with myGov</div>
             <div className="text-sm text-neutral-600">Linking with myGov helps verify your identity so you can access council services.</div>
@@ -745,16 +1045,6 @@ function OnboardingFlow() {
                 <div className="text-sm text-green-700">myGov linked ✓</div>
               )}
             </div>
-          </div>
-
-          <div>
-            <div className="font-semibold">Select your Council</div>
-            <div className="text-sm text-neutral-600">Choose the council or local area you belong to.</div>
-            <select value={council} onChange={(e) => setCouncil(e.target.value)} className="mt-2 rounded-md border px-3 py-2 w-full">
-              <option>Central Park Council</option>
-              <option>Northside Council</option>
-              <option>East End Council</option>
-            </select>
           </div>
 
           <div className="pt-4 flex justify-end">

@@ -75,7 +75,8 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-neutral-50 p-4">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm p-6 md:p-8">
-        <h1 className="text-2xl font-bold mb-4 text-neutral-900 text-center">Select Your Community Preferences</h1>
+  <h1 className="text-2xl font-bold mb-1 text-neutral-900 text-center">OneCouncil</h1>
+  <div className="text-sm text-neutral-600 mb-4 text-center">Select Your Community Preferences</div>
         <form className="space-y-6">
           {preferencesList.map(cat => (
             <div key={cat.category}>
