@@ -371,14 +371,83 @@ function EventItem({ title, date }) {
 }
 
 function Proposal({ title }) {
+  const [selected, setSelected] = useState(null);
+  const [showComment, setShowComment] = useState(false);
+  const [comment, setComment] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  // Vote counters
+  const [supportCount, setSupportCount] = useState(0);
+  const [neutralCount, setNeutralCount] = useState(0);
+  const [opposeCount, setOpposeCount] = useState(0);
+
+  function handleSelect(option) {
+    setSelected(option);
+    setShowComment(true);
+  }
+
+  function handleDone() {
+    setSubmitted(true);
+    // Increment vote counter
+    if (selected === 'Support') setSupportCount(c => c + 1);
+    if (selected === 'Neutral') setNeutralCount(c => c + 1);
+    if (selected === 'Oppose') setOpposeCount(c => c + 1);
+    setTimeout(() => {
+      setShowComment(false);
+      setComment("");
+      setSelected(null);
+      setSubmitted(false);
+    }, 1200); // Hide after 1.2s
+  }
+
+  const totalVotes = supportCount + neutralCount + opposeCount;
+
   return (
-    <div>
-      <div className="text-neutral-900 font-medium">{title}</div>
+    <div className="mb-6">
+      <div className="text-neutral-900 font-medium mb-1">{title}</div>
       <div className="mt-2 flex items-center gap-2">
-        <button className="rounded-lg bg-blue-600 text-white text-sm px-3 py-1.5 hover:brightness-110 active:translate-y-[1px]">Support</button>
-        <button className="rounded-lg border border-neutral-300 text-neutral-700 text-sm px-3 py-1.5 hover:bg-neutral-50">Neutral</button>
-        <button className="rounded-lg border border-neutral-300 text-neutral-700 text-sm px-3 py-1.5 hover:bg-neutral-50">Oppose</button>
+        <button
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Support' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
+          onClick={() => handleSelect('Support')}
+        >
+          Support
+        </button>
+        <button
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Neutral' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
+          onClick={() => handleSelect('Neutral')}
+        >
+          Neutral
+        </button>
+        <button
+          className={`rounded-lg px-3 py-1.5 text-sm font-semibold border transition-all duration-150 ${selected === 'Oppose' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-neutral-800 border-neutral-300 hover:bg-blue-50'}`}
+          onClick={() => handleSelect('Oppose')}
+        >
+          Oppose
+        </button>
       </div>
+      {/* Only show total votes */}
+      <div className="mt-2 text-xs text-neutral-600">
+        <span>Total Votes: <span className="font-bold text-neutral-900">{totalVotes}</span></span>
+      </div>
+      {showComment && !submitted && (
+        <div className="animate-fade-in mt-3">
+          <textarea
+            className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-base text-neutral-900 placeholder:text-neutral-400 shadow-xs focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 transition-all duration-200"
+            rows={2}
+            value={comment}
+            onChange={e => setComment(e.target.value)}
+            placeholder="Optional: Add a comment..."
+          />
+          <button
+            className="mt-2 rounded-lg bg-blue-600 text-white text-sm px-4 py-1.5 font-medium hover:brightness-110 active:translate-y-[1px]"
+            onClick={handleDone}
+          >
+            Done
+          </button>
+        </div>
+      )}
+      {submitted && (
+        <div className="mt-3 text-green-700 text-sm font-semibold animate-fade-in">Thank you for your feedback!</div>
+      )}
     </div>
   );
 }
