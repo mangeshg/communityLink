@@ -54,7 +54,7 @@ export default function CouncilLogin() {
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-10">
           <h3 className="text-lg font-semibold text-neutral-900 mb-4">Council sign in</h3>
 
-          <div className="h-px bg-neutral-100 my-6" />
+          
 
           <form onSubmit={handleCouncilLogin} className="space-y-4">
             <div>
