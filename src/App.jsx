@@ -169,6 +169,15 @@ function Dashboard({ onSignOut }) {
           </div>
         </Card>
 
+        {/* Council Projects */}
+        <Card>
+          <CardTitle>Council Projects</CardTitle>
+          <div className="mt-3 space-y-5">
+            <Proposal title="New Library Construction ($5M)" />
+            <Proposal title="Road Safety Initiative ($500K)" />
+          </div>
+        </Card>
+
         {/* Services Offered */}
         <Card>
           <CardTitle>Services Offered</CardTitle>
