@@ -129,6 +129,14 @@ function Dashboard({ onSignOut }) {
             <Proposal title="Central Park Upgrade ($2M)" />
             <Proposal title="Community Garden ($50K)" />
           </div>
+          <div className="mt-4 flex justify-end">
+            <button
+              className="rounded-lg bg-blue-600 text-white text-sm px-4 py-2 hover:brightness-110 active:translate-y-[1px]"
+              onClick={() => alert('Submit New Idea functionality not implemented yet!')}
+            >
+              + Submit My Idea
+            </button>
+          </div>
         </Card>
 
         {/* Services Offered */}
