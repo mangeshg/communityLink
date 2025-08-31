@@ -98,7 +98,7 @@ The solution enables councils to:
 ## System Architecture (Prod)
 ```mermaid
 flowchart LR
-  subgraph "Client"
+  subgraph "Client App"
     A["CommunityLink"]
     B["OneCouncil"]
   end
