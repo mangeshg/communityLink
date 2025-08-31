@@ -96,48 +96,47 @@ The solution enables councils to:
 ---
 
 ## System Architecture (Prod)
-
 ```mermaid
 flowchart LR
-  subgraph Client
-    A[Resident Web App (React)]
-    B[Council Admin Web App (React)]
-  end
+	subgraph Client
+		A["Resident Web App — React"]
+		B["Council Admin Web App — React"]
+	end
 
-  A -->|HTTPS| G[API Gateway: authn, rate limit, routing]
-  B -->|HTTPS| G
+	A -->|HTTPS| G["API Gateway (authn, rate limit, routing)"]
+	B -->|HTTPS| G
 
-  G -->|OIDC| H[(myGovID or OIDC Provider)]
+	G -->|OIDC| H["myGovID / OIDC Provider"]
 
-  G --> I[Engagement Service: participation and sentiment]
-  G --> J[Ideas Service: submissions, votes, comments]
-  G --> K[Events Service: events, interests, prefs]
+	G --> I["Engagement Service (participation & sentiment)"]
+	G --> J["Ideas Service (submissions, votes, comments)"]
+	G --> K["Events Service (events, interests, prefs)"]
 
-  I --> Q[[Privacy & Aggregation: k-anon, thresholds, DP]]
-  J --> Q
-  K --> Q
-  Q --> G
+	I --> Q["Privacy & Aggregation (k-anon, thresholds, DP)"]
+	J --> Q
+	K --> Q
+	Q --> G
 
-  I --> L[(Postgres: multi-tenant via RLS or schemas)]
-  J --> L
-  K --> L
+	I --> L["Postgres (multi-tenant: RLS or schemas)"]
+	J --> L
+	K --> L
 
-  I --> M[(Analytics / OLAP: time series, cubes)]
-  J --> M
-  K --> M
+	I --> M["Analytics / OLAP (time-series & cubes)"]
+	J --> M
+	K --> M
 
-  J --> N[(Object Storage: attachments)]
-  G --> O[(Redis: sessions, rate limits)]
+	J --> N["Object Storage (attachments)"]
+	G --> O["Redis (sessions, rate limits)"]
 
-  I <--> P[(Message Bus: event ingest)]
-  J <--> P
-  K <--> P
+	I <--> P["Message Bus (event ingest)"]
+	J <--> P
+	K <--> P
 
-  R[Observability: logs, tracing, metrics]
-  I --> R
-  J --> R
-  K --> R
-  G --> R
+	R["Observability (logs, tracing, metrics)"]
+	I --> R
+	J --> R
+	K --> R
+	G --> R
 
 ```
 
