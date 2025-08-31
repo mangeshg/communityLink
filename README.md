@@ -243,7 +243,7 @@ flowchart LR
 * Encourages constructive dialogue over polarisation in decision making processs.
 * Council has visibiltiy of authentic community feedback while making the Decisions.
 * Council has assistance in crafting on the correct implementation plan to address community Feedback.
-* OneConcil , It can easily be a One Portal Serving all the Councils in Australia , As a MyGov Service . Providing unified experience for the residents regardless where they stay.
+* OneCouncil , It can easily be a One Portal Serving all the Councils in Australia , As a MyGov Service . Providing unified experience for the residents regardless where they stay.
 
 ---
 
