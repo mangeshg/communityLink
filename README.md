@@ -95,11 +95,199 @@ The solution enables councils to:
 
 ---
 
-## Example Data & APIs
+## System Architecture (Prod)
 
-TODO
+```mermaid
+flowchart LR
+	subgraph Client
+		A[Resident Web App<br/>(React)]
+		B[Council Admin Web App<br/>(React)]
+	end
+
+	A -->|HTTPS| G[API Gateway<br/>AuthN, rate limit, routing]
+	B -->|HTTPS| G
+
+	G -->|OIDC| H[(myGovID / OIDC Provider)]
+
+	G --> I[Engagement Service<br/>participation & sentiment]
+	G --> J[Ideas Service<br/>submissions, votes, comments]
+	G --> K[Events Service<br/>events, interests, prefs]
+
+	%% Privacy layer sits between services and outward APIs for aggregated-only reads
+	I --> Q[[Privacy/Aggregation Layer<br/>k-anon, thresholds, DP]]
+	J --> Q
+	K --> Q
+	Q --> G
+
+	I --> L[(Postgres<br/>multi-tenant: RLS/schema-per-tenant)]
+	J --> L
+	K --> L
+
+	I --> M[(Analytics/OLAP<br/>time-series & cubes)]
+	J --> M
+	K --> M
+
+	J --> N[(Object Storage<br/>attachments)]
+	G --> O[(Redis<br/>sessions, rate limits)]
+
+	I <--> P[(Message Bus<br/>events/ingest)]
+	J <--> P
+	K <--> P
+
+	subgraph Observability
+		R[Logs/Tracing/Metrics (SIEM/APM)]
+	end
+	I --> R
+	J --> R
+	K --> R
+	G --> R
+```
+
+**Notes (prod):**
+
+* Tokens/sessions live in **HttpOnly, Secure, SameSite cookies** (gateway creates/rotates). No LocalStorage.
+* **Tenant context** is derived server-side from identity → enforced via Postgres **RLS** or schema-per-tenant.
+* Read paths for dashboards go through **Privacy/Aggregation Layer** so only thresholded, anonymised numbers ever reach clients.
 
 ---
+
+## API Surface (concise)
+
+### Auth & Session
+
+| Method | Path                           | Description                                  | Auth           |
+| ------ | ------------------------------ | -------------------------------------------- | -------------- |
+| `GET`  | `/auth/start?provider=mygovid` | Begin OIDC flow                              | Public         |
+| `GET`  | `/auth/callback`               | OIDC callback → sets HttpOnly session cookie | Public         |
+| `POST` | `/auth/logout`                 | Clears session                               | Session cookie |
+
+### Resident – Events/Prefs
+
+| Method | Path                                                    | Description                                     |
+| ------ | ------------------------------------------------------- | ----------------------------------------------- |
+| `GET`  | `/api/v1/events?lga={id}&from=YYYY-MM-DD&to=YYYY-MM-DD` | List public events (tenant-scoped)              |
+| `POST` | `/api/v1/events/{eventId}/interest`                     | Register interest                               |
+| `GET`  | `/api/v1/preferences`                                   | Get user prefs                                  |
+| `PUT`  | `/api/v1/preferences`                                   | Update prefs (categories, accessibility, times) |
+
+**Example payloads**
+
+```json
+// PUT /api/v1/preferences
+{
+	"categories": ["arts_culture","sports"],
+	"age_group": "18_34",
+	"availability": ["weeknights","weekend_mornings"],
+	"accessibility": ["step_free","quiet_space"]
+}
+```
+
+### Resident – Ideas & Feedback
+
+| Method | Path                         | Description                                 |
+| ------ | ---------------------------- | ------------------------------------------- |
+| `POST` | `/api/v1/ideas`              | Submit an idea (text + optional attachment) |
+| `POST` | `/api/v1/ideas/{id}/vote`    | { "vote": "support|neutral|oppose" }     |
+| `POST` | `/api/v1/ideas/{id}/comment` | Short, moderated comment                    |
+| `POST` | `/api/v1/ideas/summarise`    | (Server-side) AI summary helper             |
+
+**Example payloads**
+
+```json
+// POST /api/v1/ideas
+{
+	"title": "Pop-up multicultural food night",
+	"body": "Partner with local groups to host monthly events in the town square.",
+	"tags": ["belonging","youth","food"],
+	"location_lga": "Whitehorse"
+}
+
+// POST /api/v1/ideas/summarise
+{
+	"text": "Partner with local groups to host monthly multicultural food nights..."
+}
+```
+
+**Example responses**
+
+```json
+// 201 Created (idea)
+{
+	"id": "idea_01HZX...",
+	"status": "received",
+	"moderation": "pending"
+}
+
+// 200 OK (summary)
+{
+	"summary": "Monthly multicultural food nights to foster belonging and cross-cultural exchange.",
+	"key_points": ["low-cost pilots", "partner local groups", "youth focus"]
+}
+```
+
+### Admin – Cohesion & Engagement (Aggregated Only)
+
+| Method | Path                                                  | Description                             |
+| ------ | ----------------------------------------------------- | --------------------------------------- |
+| `GET`  | `/api/v1/engagement/participation?lga={id}&months=12` | Time series index (aggregated)          |
+| `GET`  | `/api/v1/engagement/sentiment?lga={id}`               | Aggregated sentiment per project/topic  |
+| `GET`  | `/api/v1/ideas?lga={id}`                              | List ideas + vote tallies (thresholded) |
+
+**Example responses**
+
+```json
+// GET /api/v1/engagement/participation
+{
+	"lga": "Whitehorse",
+	"series": [
+		{"month": "2024-01", "index": 62},
+		{"month": "2024-02", "index": 64},
+		{"month": "2024-03", "index": 67}
+	],
+	"method": "z-scored composite (events, ideas, votes, visits)"
+}
+
+// GET /api/v1/engagement/sentiment
+{
+	"lga": "Whitehorse",
+	"topics": [
+		{"topic": "parks_upgrade", "support": 132, "neutral": 41, "oppose": 28, "n": 201},
+		{"topic": "night_markets", "support": 98, "neutral": 22, "oppose": 11, "n": 131}
+	],
+	"min_threshold": 10
+}
+```
+
+---
+
+## Mock Data (this repo) → how it maps
+
+| File                                | Purpose                                          | Used by                               |
+| ----------------------------------- | ------------------------------------------------ | ------------------------------------- |
+| `src/mockData/participation.json`   | 12-month participation index (demo)              | Admin dashboard chart                 |
+| `src/CouncilDashboard.jsx` (inline) | Mock sentiment tiles & topic rollups             | Admin dashboard                       |
+| `src/App.jsx` → “SubmitIdeaBot”     | Simulated AI summary response                    | Idea flow                             |
+| `src/Onboarding.jsx` (demo only)    | Stores `communityLink_council` during onboarding | To be replaced by server-side tenancy |
+
+**Example `participation.json` (trimmed)**
+
+```json
+[
+	{"month":"2024-01","index":62},
+	{"month":"2024-02","index":64},
+	{"month":"2024-03","index":67}
+]
+```
+
+---
+
+## Data & Privacy Rules (enforced in services)
+
+* **Write paths** (ideas, votes, comments) → authenticated identity; PII stored server-side only, never returned to clients.
+* **Read paths** for dashboards → served **only** via Aggregation Layer: thresholded counts, no raw events.
+* **Tenancy** via RLS/schema-per-tenant; every query scoped by `tenant_id`.
+* **Sessions** in HttpOnly cookies; optional short-lived access tokens mirrored in memory.
+
 
 ## Benefits
 
