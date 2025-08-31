@@ -99,8 +99,8 @@ The solution enables councils to:
 ```mermaid
 flowchart LR
   subgraph "Client"
-    A["Resident Web App"]
-    B["Council Admin Web App"]
+    A["CommunityLink"]
+    B["OneCouncil"]
   end
 
   A --> G["API Gateway"]
