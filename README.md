@@ -89,6 +89,9 @@ This repository includes a lightweight developer/demo setup used for prototyping
 * View aggregated, anonymised signals to prioritise engagement
 * Action Plans for fostering further Community Engagements Or Acting on Community Feedback.
 
+![Council Admin Demo](imgs/council-view.gif)
+
+
 ---
 
 ## System Architecture (Prod)
