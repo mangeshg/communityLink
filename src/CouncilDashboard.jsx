@@ -78,14 +78,16 @@ export default function CouncilDashboard() {
   const feedbackProjects = React.useMemo(() => {
     return [
       {
-        id: 'park-upgrade',
-        title: 'Local Park Improvements',
-        sentiments: { positive: 64, neutral: 22, negative: 14 },
+        id: 'coffee-with-cop',
+        title: 'Coffee with a Cop',
+        // Mixed feedback: balanced positive/neutral with some negative
+        sentiments: { positive: 40, neutral: 40, negative: 20 },
       },
       {
-        id: 'bike-lanes',
-        title: 'Safer Bike Lanes',
-        sentiments: { positive: 48, neutral: 30, negative: 22 },
+        id: 'community-patrol-feedback',
+        title: 'Community Patrol Trial',
+        // Very negative community sentiment
+        sentiments: { positive: 10, neutral: 15, negative: 75 },
       },
       {
         id: 'cultural-fest',
@@ -98,6 +100,162 @@ export default function CouncilDashboard() {
         sentiments: { positive: 39, neutral: 41, negative: 20 },
       },
     ];
+  }, []);
+
+  // Action plan projects (derived or explicit) with suggested agentic steps
+  const actionProjects = React.useMemo(() => {
+    return [
+      {
+        id: 'coffee-with-cop',
+        title: 'Coffee with Cop — Minority Inclusion Campaign',
+        description: 'Run a targeted outreach campaign to invite minority communities to a "Coffee with Cop" initiative to build trust and open dialogue.',
+        sentiments: { positive: 52, neutral: 30, negative: 18 },
+        status: 'Planned',
+        suggestedSteps: [
+          { id: 'c1', who: 'AI Agent', desc: 'Draft event notification copy and tailored variants for specific community audiences', eta: '2 days' },
+          { id: 'c2', who: 'Communications', desc: 'Publish event on council website and social channels; include accessibility info', eta: '3 days' },
+          { id: 'c3', who: 'AI Agent', desc: 'Schedule and post to local community Facebook groups, Twitter/X, and Instagram with geo/interest targeting', eta: '3 days' },
+          { id: 'c4', who: 'Marketing', desc: 'Run boosted ad campaigns at community events and pages frequented by minority groups', eta: '1 week' },
+          { id: 'c5', who: 'Community Outreach', desc: 'Contact minority community organisations and offer supported transport/translation where needed', eta: '2 weeks' },
+          { id: 'c6', who: 'AI Agent', desc: 'Monitor RSVPs and sentiment; surface issues and recommend follow-up actions', eta: 'Ongoing' },
+        ],
+      },
+      {
+        id: 'cultural-festival',
+        title: 'Cultural Festival',
+        description: 'A two-day celebration showcasing local arts, food and performance to boost local engagement.',
+        sentiments: { positive: 72, neutral: 18, negative: 10 },
+        status: 'Planned',
+        suggestedSteps: [
+          { id: 'c1', who: 'Arts Coord', desc: 'Confirm dates and permits', eta: '1 week' },
+          { id: 'c2', who: 'Marketing', desc: 'Create poster and community outreach plan', eta: '2 weeks' },
+          { id: 'c3', who: 'Volunteers', desc: 'Recruit volunteers and stewards', eta: '3 weeks' },
+        ],
+      },
+      {
+        id: 'community-patrol',
+        title: 'Community Patrol Trial',
+        description: 'Pilot a community patrol program to improve local presence, reporting and resident confidence.',
+        sentiments: { positive: 34, neutral: 40, negative: 26 },
+        status: 'Needs Approval',
+        suggestedSteps: [
+          { id: 'p1', who: 'Community Safety', desc: 'Design pilot patrol schedule and priority areas', eta: '2 weeks' },
+          { id: 'p2', who: 'Council', desc: 'Approve pilot scope and resources', eta: '4 weeks' },
+          { id: 'p3', who: 'Communications', desc: 'Prepare community brief and reporting channels', eta: '1 week' },
+        ],
+      },
+    ];
+  }, []);
+
+  // Sentiment pill (RAG) helper
+  function SentimentPill({ sentiments }) {
+    const { positive = 0, neutral = 0, negative = 0 } = sentiments || {};
+    const total = Math.max(positive + neutral + negative, 1);
+    const positivePct = Math.round((positive / total) * 100);
+    const score = positivePct; // 0-100
+    let bg = 'bg-amber-300 text-amber-900';
+    let label = `Mixed (${positivePct}%)`;
+    if (score >= 60) {
+      bg = 'bg-emerald-200 text-emerald-800';
+      label = `Positive (${positivePct}%)`;
+    } else if (score < 40) {
+      bg = 'bg-red-200 text-red-800';
+      label = `Negative (${positivePct}%)`;
+    }
+    return (
+      <div className={`inline-flex items-center gap-2 px-2 py-1 rounded-full text-xs font-medium ${bg}`}>
+        <span className="w-2 h-2 rounded-full" style={{ background: score >= 60 ? '#16a34a' : score < 40 ? '#dc2626' : '#f59e0b' }} />
+        <span>{label}</span>
+      </div>
+    );
+  }
+
+  // Save an action execution entry to localStorage (audit trail)
+  function recordActionExecution(entry) {
+    if (typeof window === 'undefined') return;
+    try {
+      const key = 'communityLink_actionAudit';
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      existing.unshift(entry);
+      localStorage.setItem(key, JSON.stringify(existing));
+    } catch (e) {
+      // ignore storage errors
+    }
+  }
+
+  // Project card component for the Action Plan
+  function ProjectCard({ proj }) {
+    const [open, setOpen] = React.useState(false);
+    const [executing, setExecuting] = React.useState(false);
+
+    async function handleExecute() {
+      setExecuting(true);
+      const entry = {
+        id: `${proj.id}-${Date.now()}`,
+        projectId: proj.id,
+        title: proj.title,
+        timestamp: new Date().toISOString(),
+        plan: proj.suggestedSteps,
+        status: 'executed',
+      };
+      // fake slight delay to mimic async task
+      await new Promise((r) => setTimeout(r, 600));
+      recordActionExecution(entry);
+      setExecuting(false);
+      // simple UI feedback
+      setOpen(false);
+      alert(`Action executed and recorded for "${proj.title}"`);
+    }
+
+    return (
+      <Card className="flex flex-col">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h4 className="font-semibold text-neutral-900">{proj.title}</h4>
+              <SentimentPill sentiments={proj.sentiments} />
+            </div>
+            <div className="text-sm text-neutral-600 mt-2">{proj.description}</div>
+            <div className="text-xs text-neutral-500 mt-2">Status: <span className="font-medium">{proj.status}</span></div>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <button onClick={() => setOpen((s) => !s)} className="rounded-md border px-3 py-1 text-sm">{open ? 'Hide Plan' : 'Preview Plan'}</button>
+            <button onClick={handleExecute} disabled={executing} className="rounded-md bg-blue-600 text-white px-3 py-1 text-sm disabled:opacity-60">
+              {executing ? 'Executing…' : 'Execute Plan'}
+            </button>
+          </div>
+        </div>
+
+        {open && (
+          <div className="mt-3 border-t pt-3">
+            <div className="text-sm font-medium mb-2">Agentic AI Action Plan</div>
+            <ol className="list-decimal list-inside text-sm space-y-2">
+              {proj.suggestedSteps.map((s) => (
+                <li key={s.id} className="flex items-start justify-between">
+                  <div>
+                    <div className="font-medium">{s.desc}</div>
+                    <div className="text-xs text-neutral-500">Owner: {s.who} • ETA: {s.eta}</div>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </Card>
+    );
+  }
+
+  // Read recent executions for a small audit preview
+  const recentExecutions = React.useMemo(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const key = 'communityLink_actionAudit';
+      const all = JSON.parse(localStorage.getItem(key) || '[]');
+      return Array.isArray(all) ? all.slice(0, 5) : [];
+    } catch (e) {
+      return [];
+    }
   }, []);
 
   return (
@@ -137,16 +295,7 @@ export default function CouncilDashboard() {
               <div className="text-sm text-neutral-500 italic mt-2">Measure of pride, fairness, and confidence in governance</div>
             </div>
           </Card>
-          <Card>
-            <CardTitle>Recent Community Actions</CardTitle>
-            <div className="mt-3 text-sm">
-              <ul className="list-disc ml-4">
-                <li>Survey: Local Park Improvements</li>
-                <li>Petition: Safer Bike Lanes</li>
-                <li>Forum: Cultural Diversity Event</li>
-              </ul>
-            </div>
-          </Card>
+          
         </div>
 
         <div>
@@ -168,12 +317,6 @@ export default function CouncilDashboard() {
               onClick={() => setTab("action")}
             >
               Action Plan
-            </button>
-            <button
-              className={`rounded-md px-3 py-1 ${tab === "cohesion" ? "bg-blue-600 text-white" : "border"}`}
-              onClick={() => setTab("cohesion")}
-            >
-              Cohesion Metrics
             </button>
           </div>
 
@@ -314,22 +457,37 @@ export default function CouncilDashboard() {
           )}
 
           {tab === "action" && (
-            <Card>
-              <CardTitle>Community Action Plan</CardTitle>
-              <div className="mt-3 grid gap-2 text-sm">
-                <div>🟢 Inclusive Sports Program – In Progress</div>
-                <div>🟡 Cultural Festival – Planned</div>
-                <div>🔴 Road Safety Initiative – Needs Approval</div>
-              </div>
-            </Card>
+            <div className="grid gap-3">
+              <Card>
+                <CardTitle>Community Action Plan</CardTitle>
+                <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {actionProjects.map((p) => (
+                    <ProjectCard key={p.id} proj={p} />
+                  ))}
+                </div>
+              </Card>
+
+              <Card>
+                <CardTitle>Recent Executions</CardTitle>
+                <div className="mt-3 text-sm text-neutral-600">
+                  {recentExecutions.length === 0 ? (
+                    <div>No recent executions recorded.</div>
+                  ) : (
+                    <ul className="list-disc ml-4">
+                      {recentExecutions.map((e) => (
+                        <li key={e.id} className="text-xs">
+                          <div className="font-medium">{e.title}</div>
+                          <div className="text-neutral-500">{new Date(e.timestamp).toLocaleString()}</div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </Card>
+            </div>
           )}
 
-          {tab === "cohesion" && (
-            <Card>
-              <CardTitle>Cohesion & Trust Metrics</CardTitle>
-              <div className="mt-3 text-sm text-neutral-600">Simple indicators and trends go here.</div>
-            </Card>
-          )}
+          
         </div>
       </main>
     </div>
