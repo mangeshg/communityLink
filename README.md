@@ -26,7 +26,7 @@ This project addresses the **GovHack challenge**: to design initiatives that str
 
 ## Solution Overview
 
-**CommunityLink** is a lightweight demo platform built with React, Vite, and TailwindCSS. It demonstrates a **OneCouncil, multi-tenant approach** to local community engagement.
+**CommunityLink** is a platform built with React, Vite, and TailwindCSS that implements a **OneCouncil, multi-tenant approach** to local community engagement.
 
 The solution enables councils to:
 
@@ -41,17 +41,20 @@ The solution enables councils to:
 * **Dual User Model:** Residents and Council Admins with tailored dashboards
 * **Aggregated, Anonymous Engagement:** Protects privacy while surfacing actionable insights
 * **Respectful Dialogue:** Sentiment aggregation reduces prominence of divisive content
-* **AI Summariser (Demo):** Shows how AI can assist in framing proposals
+* **AI Summariser:** Optional AI-assisted summarisation to help frame proposals
 
 ---
 
 ## Technical Design
 
-### Demo Stack
+### Developer / Demo notes
 
-* **Frontend:** React (JSX), Vite
-* **Styling:** TailwindCSS
-* **Data:** LocalStorage + static mock data (`src/mockData/`)
+This repository includes a lightweight developer/demo setup used for prototyping and presentation. These notes explain what is in the repo and how it differs from a production deployment:
+
+- **Frontend (dev):** React (JSX), Vite (dev server)
+- **Styling (dev):** TailwindCSS
+- **Mock data:** static files under `src/mockData/` used to populate charts and tiles during development
+- **Local tenancy (dev):** onboarding stores a selected council in local client state for fast prototyping. In production tenancy MUST be server-side and enforced by the backend.
 
 ### Production Stack (Recommended)
 
@@ -65,10 +68,10 @@ The solution enables councils to:
 
 ### Architecture & Privacy
 
-* Tenancy stored per user → scoped council context
-* Auth (demo): simulated myGovID; production → OIDC provider
-* Participation & sentiment → aggregated charts (demo in SVG, client-side)
-* Privacy: no PII stored; demo uses static data. Production must enforce encryption, access control, aggregation thresholds, k-anonymity/differential privacy, and compliance with records laws.
+* Tenancy is server-side and scoped per council (derived from authenticated identity). Client-side selection is only used in the developer/demo flow in this repo.
+* Auth: production uses an OIDC-compliant provider (for example myGovID). The repository contains a simulated flow for local development only.
+* Participation & sentiment: dashboards display aggregated indicators. The repo includes an SVG-based prototype visualisation rendered client-side from mock data; in production visualisations should be fed by aggregated APIs.
+* Privacy: production must enforce encryption at rest/in transit, strict access controls, aggregation thresholds, k-anonymity or differential privacy, audit logging, and records management compliance.
 
 ### Security
 
@@ -308,7 +311,7 @@ npm run preview
 
 **Long-term:**
 
-* Integrate government datasets (per challenge brief)
+* Integrate government datasets
 * Advanced analytics: segmentation, cohort analysis, impact measurement
 
 ---
