@@ -241,27 +241,6 @@ flowchart LR
 
 ---
 
-## Mock Data (this repo) → how it maps
-
-| File                                | Purpose                                          | Used by                               |
-| ----------------------------------- | ------------------------------------------------ | ------------------------------------- |
-| `src/mockData/participation.json`   | 12-month participation index (demo)              | Admin dashboard chart                 |
-| `src/CouncilDashboard.jsx` (inline) | Mock sentiment tiles & topic rollups             | Admin dashboard                       |
-| `src/App.jsx` → “SubmitIdeaBot”     | Simulated AI summary response                    | Idea flow                             |
-| `src/Onboarding.jsx` (demo only)    | Stores `communityLink_council` during onboarding | To be replaced by server-side tenancy |
-
-**Example `participation.json` (trimmed)**
-
-```json
-[
-	{"month":"2024-01","index":62},
-	{"month":"2024-02","index":64},
-	{"month":"2024-03","index":67}
-]
-```
-
----
-
 ## Data & Privacy Rules (enforced in services)
 
 * **Write paths** (ideas, votes, comments) → authenticated identity; PII stored server-side only, never returned to clients.
