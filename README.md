@@ -26,7 +26,7 @@ This project addresses the **GovHack challenge**: to design initiatives that str
 
 ## Solution Overview
 
-**CommunityLink** is a platform built with React, Vite, and TailwindCSS that implements a **OneCouncil, multi-tenant approach** to local community engagement.
+**CommunityLink** is a platform that implements a **OneCouncil, multi-tenant approach** to local community engagement.
 
 The solution enables councils to:
 
