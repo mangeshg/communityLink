@@ -98,45 +98,29 @@ The solution enables councils to:
 ## System Architecture (Prod)
 ```mermaid
 flowchart LR
-	subgraph Client
-		A["Resident Web App — React"]
-		B["Council Admin Web App — React"]
-	end
+  subgraph "Client"
+    A["Resident Web App"]
+    B["Council Admin Web App"]
+  end
 
-	A -->|HTTPS| G["API Gateway (authn, rate limit, routing)"]
-	B -->|HTTPS| G
+  A --> G["API Gateway"]
+  B --> G
 
-	G -->|OIDC| H["myGovID / OIDC Provider"]
+  G --> H["Auth (OIDC / myGovID)"]
 
-	G --> I["Engagement Service (participation & sentiment)"]
-	G --> J["Ideas Service (submissions, votes, comments)"]
-	G --> K["Events Service (events, interests, prefs)"]
+  G --> S["Engagement Service"]
+  G --> J["Ideas Service"]
+  G --> K["Events Service"]
 
-	I --> Q["Privacy & Aggregation (k-anon, thresholds, DP)"]
-	J --> Q
-	K --> Q
-	Q --> G
+  S --> D["Database"]
+  J --> D
+  K --> D
 
-	I --> L["Postgres (multi-tenant: RLS or schemas)"]
-	J --> L
-	K --> L
+  S --> M["Analytics"]
+  J --> M
+  K --> M
 
-	I --> M["Analytics / OLAP (time-series & cubes)"]
-	J --> M
-	K --> M
-
-	J --> N["Object Storage (attachments)"]
-	G --> O["Redis (sessions, rate limits)"]
-
-	I <--> P["Message Bus (event ingest)"]
-	J <--> P
-	K <--> P
-
-	R["Observability (logs, tracing, metrics)"]
-	I --> R
-	J --> R
-	K --> R
-	G --> R
+  G --> R["Observability"]
 
 ```
 
