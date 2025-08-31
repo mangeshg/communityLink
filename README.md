@@ -99,48 +99,46 @@ The solution enables councils to:
 
 ```mermaid
 flowchart LR
-	subgraph Client
-		A[Resident Web App<br/>(React)]
-		B[Council Admin Web App<br/>(React)]
-	end
+  subgraph Client
+    A[Resident Web App (React)]
+    B[Council Admin Web App (React)]
+  end
 
-	A -->|HTTPS| G[API Gateway<br/>AuthN, rate limit, routing]
-	B -->|HTTPS| G
+  A -->|HTTPS| G[API Gateway: authn, rate limit, routing]
+  B -->|HTTPS| G
 
-	G -->|OIDC| H[(myGovID / OIDC Provider)]
+  G -->|OIDC| H[(myGovID or OIDC Provider)]
 
-	G --> I[Engagement Service<br/>participation & sentiment]
-	G --> J[Ideas Service<br/>submissions, votes, comments]
-	G --> K[Events Service<br/>events, interests, prefs]
+  G --> I[Engagement Service: participation and sentiment]
+  G --> J[Ideas Service: submissions, votes, comments]
+  G --> K[Events Service: events, interests, prefs]
 
-	%% Privacy layer sits between services and outward APIs for aggregated-only reads
-	I --> Q[[Privacy/Aggregation Layer<br/>k-anon, thresholds, DP]]
-	J --> Q
-	K --> Q
-	Q --> G
+  I --> Q[[Privacy & Aggregation: k-anon, thresholds, DP]]
+  J --> Q
+  K --> Q
+  Q --> G
 
-	I --> L[(Postgres<br/>multi-tenant: RLS/schema-per-tenant)]
-	J --> L
-	K --> L
+  I --> L[(Postgres: multi-tenant via RLS or schemas)]
+  J --> L
+  K --> L
 
-	I --> M[(Analytics/OLAP<br/>time-series & cubes)]
-	J --> M
-	K --> M
+  I --> M[(Analytics / OLAP: time series, cubes)]
+  J --> M
+  K --> M
 
-	J --> N[(Object Storage<br/>attachments)]
-	G --> O[(Redis<br/>sessions, rate limits)]
+  J --> N[(Object Storage: attachments)]
+  G --> O[(Redis: sessions, rate limits)]
 
-	I <--> P[(Message Bus<br/>events/ingest)]
-	J <--> P
-	K <--> P
+  I <--> P[(Message Bus: event ingest)]
+  J <--> P
+  K <--> P
 
-	subgraph Observability
-		R[Logs/Tracing/Metrics (SIEM/APM)]
-	end
-	I --> R
-	J --> R
-	K --> R
-	G --> R
+  R[Observability: logs, tracing, metrics]
+  I --> R
+  J --> R
+  K --> R
+  G --> R
+
 ```
 
 **Notes (prod):**
