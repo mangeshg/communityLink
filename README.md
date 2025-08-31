@@ -81,6 +81,7 @@ This repository includes a lightweight developer/demo setup used for prototyping
 * Access existing council service flows (waste, parking, rates)
 
 ![Resident User Journey Demo](imgs/user-view.gif)
+
 **Council Admins**
 
 * Dashboard with belonging/trust scores and engagement snapshots
