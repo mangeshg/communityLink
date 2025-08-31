@@ -16,32 +16,34 @@ Key dimensions of cohesion include:
 * **Participation** – active engagement in political and civic life
 * **Acceptance & Rejection** – attitudes to diversity and experiences of discrimination
 
-This project addresses the **GovHack challenge**: to design initiatives that strengthen community connection, trust in government, and respectful debate. Deliverables should:
+This project addresses following  **GovHack challenges**: to design initiatives that strengthen community connection, trust in government, and respectful debate. Deliverables should:
 
-* Present a practical idea that can be piloted locally within 6–12 months
-* Include a mock-up and evidence-based analysis, using at least one government dataset
-* Demonstrate how impact could be measured (trust, belonging, engagement, acceptance, cultural understanding)
+* Bridging Social Divides: Bringing People Together to Strengthen Social Connections
+* Using AI to Help Australians Navigate Government Services
+* Connecting New Citizens to Australian Democracy
 
 ---
 
 ## Solution Overview
 
-**CommunityLink** is a platform that implements a **OneCouncil, multi-tenant approach** to local community engagement.
+Our solution is **CommunityLink** – an AI-powered platform that brings residents and councils together.
 
 The solution enables councils to:
 
-* Discover and act on community sentiment
-* Provide safe, anonymous channels for ideas and feedback
-* Support respectful dialogue without amplifying polarisation
-* Track participation and belonging indicators over time
+* Discover and act on community sentiments.
+* Provide safe, authentic channels for ideas and feedback.
+* Support respectful dialogue without amplifying polarisation.
+* Track participation and belonging indicators over time.
+* Provide all the Current Services Councils have for residents.
+* Provide New Citizen Charter for getting them used to Govt Services more easily.
 
 ### Key Features
 
-* **OneCouncil, Multi-Tenant:** Single user experience, council selection during onboarding
+* **OneCouncil, Multi-Tenant:** Single user experience across australia, council selection during onboarding. MyGov Integration for Authentication and OneCouncil Service in MyGov Portal.
 * **Dual User Model:** Residents and Council Admins with tailored dashboards
 * **Aggregated, Anonymous Engagement:** Protects privacy while surfacing actionable insights
-* **Respectful Dialogue:** Sentiment aggregation reduces prominence of divisive content
-* **AI Summariser:** Optional AI-assisted summarisation to help frame proposals
+* **Respectful Dialogue:** Sentiment aggregation reduces prominence of divisive content.
+* **AI Summariser:** Optional AI-assisted summarisation to help frame proposals and community Ideas
 
 ---
 
@@ -66,35 +68,24 @@ This repository includes a lightweight developer/demo setup used for prototyping
 * **Storage:** S3-compatible for attachments
 * **Analytics:** Time-series DB or OLAP store
 
-### Architecture & Privacy
 
-* Tenancy is server-side and scoped per council (derived from authenticated identity). Client-side selection is only used in the developer/demo flow in this repo.
-* Auth: production uses an OIDC-compliant provider (for example myGovID). The repository contains a simulated flow for local development only.
-* Participation & sentiment: dashboards display aggregated indicators. The repo includes an SVG-based prototype visualisation rendered client-side from mock data; in production visualisations should be fed by aggregated APIs.
-* Privacy: production must enforce encryption at rest/in transit, strict access controls, aggregation thresholds, k-anonymity or differential privacy, audit logging, and records management compliance.
-
-### Security
-
-* TLS everywhere, least-privilege IAM, centralised monitoring & alerting
-* Secure defaults and dependency monitoring
-
----
 
 ## User Journeys
 
 **Residents**
 
-* Sign in and select council
+* Onboard using MyGov Authentication Process / Provide Preferences during Onboarding
 * Set preferences, browse events, register interest
 * Submit ideas (AI summary assist)
-* Vote/comment on proposals (Support / Neutral / Oppose)
-* Access simple council service flows (waste, parking, rates)
+* Vote/comment on proposals from Council (Support / Neutral / Oppose)
+* Access existing council service flows (waste, parking, rates)
 
 **Council Admins**
 
 * Dashboard with belonging/trust scores and engagement snapshots
 * Participation chart + sentiment hub
 * View aggregated, anonymised signals to prioritise engagement
+* Action Plans for fostering further Community Engagements Or Acting on Community Feedback.
 
 ---
 
@@ -244,79 +235,18 @@ flowchart LR
 
 ---
 
-## Data & Privacy Rules (enforced in services)
-
-* **Write paths** (ideas, votes, comments) → authenticated identity; PII stored server-side only, never returned to clients.
-* **Read paths** for dashboards → served **only** via Aggregation Layer: thresholded counts, no raw events.
-* **Tenancy** via RLS/schema-per-tenant; every query scoped by `tenant_id`.
-* **Sessions** in HttpOnly cookies; optional short-lived access tokens mirrored in memory.
-
 
 ## Benefits
 
-* Strengthens belonging and connection
-* Builds trust in government through transparency
-* Encourages constructive dialogue over polarisation
-* Practical for roll-out in 6–12 months
+* Strengthens belonging and connection.
+* Builds trust in government through transparency.
+* Encourages constructive dialogue over polarisation in decision making processs.
+* Council has visibiltiy of authentic community feedback while making the Decisions.
+* Council has assistance in crafting on the correct implementation plan to address community Feedback.
+* OneConcil , It can easily be a One Portal Serving all the Councils in Australia , As a MyGov Service . Providing unified experience for the residents regardless where they stay.
 
 ---
 
-## Getting Started
 
-**Prerequisites:** Node.js (LTS), npm
-
-Run locally:
-
-```bash
-cd communityLink
-npm install
-npm run dev
-# open http://localhost:5173
-```
-
-Build for production:
-
-```bash
-npm run build
-npm run preview
-```
-
----
-
-## Key Files
-
-* `src/App.jsx` → main app routes & flows
-* `src/CouncilDashboard.jsx` → admin dashboard, charts, sentiment tiles
-* `src/Onboarding.jsx` → council selection & onboarding
-* `src/CouncilLogin.jsx` → admin login stub
-* `src/mockData/participation.json` → mock participation data
-* `src/ProblemStatment.txt` → full challenge brief
-* `tailwind.config.js`, `postcss.config.js` → styling configs
-
----
-
-## Roadmap
-
-**Short-term:**
-
-* Add lightweight backend (serverless) for anonymised metrics
-* Real identity integration (myGov/OIDC)
-* Add automated tests
-
-**Mid-term:**
-
-* Tenant data separation & RBAC for admins
-* Privacy-preserving aggregation (k-anonymity, differential privacy)
-* CSV export and policy dashboards
-
-**Long-term:**
-
-* Integrate government datasets
-* Advanced analytics: segmentation, cohort analysis, impact measurement
-
----
-
-## License
-
-Govhack demo project. See repo metadata for license notes. Add an explicit license if publishing openly.
-
+## Demo Link
+https://youtu.be/55iQVKQNV8Q
